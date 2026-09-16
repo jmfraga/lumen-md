@@ -16,6 +16,7 @@ const files = readdirSync(corpusDir)
 export function normalize(md: string): string {
   return (
     md
+      .replace(/\r\n?/g, '\n')
       .split('\n')
       .map((l) => l.replace(/[ \t]+$/, ''))
       // Filas de tabla: el relleno de espacios y el largo de los guiones no cambian el contenido.
