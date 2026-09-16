@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!--
+    Lumen — icono de la app.
+    Concepto: una "L" sólida (la letra y, a la vez, el margen de una página)
+    de la que salen líneas de texto que se iluminan y se desvanecen como
+    haces de luz. Fondo índigo → azul (#2f5fd0 es el acento de la app).
+    Colores: #5d7bf0 (índigo claro) y #1f43ad (azul profundo) + blanco.
+    Regenerar png/icns/ico con:  npm run icons
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5d7bf0"/>
+      <stop offset="0.55" stop-color="#2f5fd0"/>
+      <stop offset="1" stop-color="#1f43ad"/>
+    </linearGradient>
+    <!-- halo de luz que nace en la esquina interna de la L -->
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(430 780) scale(520 520)">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- haces: líneas de texto que se iluminan y se apagan hacia la derecha -->
+    <linearGradient id="ray1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="ray2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="squircle">
+      <rect x="0" y="0" width="1024" height="1024" rx="225" ry="225"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#squircle)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <rect width="1024" height="1024" fill="url(#glow)"/>
+    <!-- brillo sutil superior, estilo macOS -->
+    <rect width="1024" height="1024" fill="url(#sheen)"/>
+  </g>
+
+  <!-- Glifo -->
+  <g>
+    <!-- líneas de texto que se iluminan (la L es el margen de la hoja) -->
+    <rect x="512" y="286" width="270" height="64" rx="32" fill="url(#ray1)"/>
+    <rect x="512" y="426" width="210" height="64" rx="32" fill="url(#ray2)"/>
+    <rect x="512" y="566" width="150" height="64" rx="32" fill="url(#ray2)"/>
+    <!-- la L: tallo + pie, una sola pieza sólida -->
+    <path fill="#ffffff" d="
+      M 272 315
+      a 59 59 0 0 1 59 -59
+      h 54
+      a 59 59 0 0 1 59 59
+      v 341
+      h 249
+      a 59 59 0 0 1 59 59
+      v 0
+      a 59 59 0 0 1 -59 59
+      h -362
+      a 59 59 0 0 1 -59 -59
+      z"/>
+  </g>
+</svg>

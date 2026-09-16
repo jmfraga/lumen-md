@@ -20,7 +20,8 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "npm run typecheck && electron-vite build && electron-builder --linux",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "icons": "electron scripts/make-icons.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",
