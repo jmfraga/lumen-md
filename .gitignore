@@ -1,0 +1,14 @@
+node_modules
+dist
+out
+.DS_Store
+*.log
+.eslintcache
+# secretos: nunca en el repo
+.env
+.env.*
+*.p12
+*.pem
+*.key
+*.mobileprovision
+build/*.p12

@@ -1,0 +1,258 @@
+/* Tokens de la interfaz (no del documento exportado). Claro por defecto, oscuro por sistema. */
+:root {
+  color-scheme: light dark;
+  --ui-bg: #ffffff;
+  --ui-fg: #1c1c1c;
+  --ui-muted: #6b6b6b;
+  --ui-border: #e3e3e3;
+  --ui-chrome: #f7f7f7;
+  --ui-accent: #2f5fd0;
+  --ui-accent-soft: #e8eefb;
+  --ui-code-bg: #f4f4f4;
+  --ui-selection: #cfe0ff;
+  --measure: 76ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ui-bg: #1e1e1e;
+    --ui-fg: #e6e6e6;
+    --ui-muted: #9a9a9a;
+    --ui-border: #333;
+    --ui-chrome: #252525;
+    --ui-accent: #7aa2ff;
+    --ui-accent-soft: #24304a;
+    --ui-code-bg: #2a2a2a;
+    --ui-selection: #2b4a80;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--ui-bg);
+  color: var(--ui-fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+.lumen-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Barra superior: en macOS deja espacio a los semáforos y permite arrastrar la ventana. */
+.lumen-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 44px;
+  padding: 0 12px 0 84px;
+  background: var(--ui-chrome);
+  border-bottom: 1px solid var(--ui-border);
+  -webkit-app-region: drag;
+  user-select: none;
+  flex: none;
+}
+.lumen-topbar-title {
+  font-size: 13px;
+  color: var(--ui-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lumen-topbar-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+.lumen-topbar-actions button {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ui-fg);
+  cursor: pointer;
+}
+.lumen-topbar-actions button:hover {
+  background: var(--ui-accent-soft);
+}
+.lumen-topbar-actions button.active {
+  background: var(--ui-accent);
+  color: #fff;
+}
+.lumen-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--ui-border);
+  margin: 0 4px;
+}
+
+.lumen-main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.lumen-wysiwyg,
+.lumen-source {
+  min-height: 100%;
+}
+
+.lumen-statusbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  font-size: 11.5px;
+  color: var(--ui-muted);
+  background: var(--ui-chrome);
+  border-top: 1px solid var(--ui-border);
+  flex: none;
+  user-select: none;
+}
+.lumen-status-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lumen-status-right {
+  display: flex;
+  gap: 14px;
+  white-space: nowrap;
+}
+.lumen-status-msg {
+  color: var(--ui-accent);
+}
+
+.lumen-drop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ui-accent) 12%, transparent);
+  border: 3px dashed var(--ui-accent);
+  font-size: 1.2rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Documento dentro de Milkdown */
+.lumen-wysiwyg .milkdown {
+  --crepe-color-background: var(--ui-bg);
+  --crepe-color-on-background: var(--ui-fg);
+  --crepe-color-surface: var(--ui-chrome);
+  --crepe-color-surface-low: var(--ui-code-bg);
+  --crepe-color-outline: var(--ui-border);
+  --crepe-color-primary: var(--ui-accent);
+  --crepe-color-secondary: var(--ui-accent-soft);
+  --crepe-color-on-secondary: var(--ui-fg);
+  --crepe-color-inverse: var(--ui-fg);
+  --crepe-color-on-inverse: var(--ui-bg);
+  --crepe-color-inline-code: var(--ui-accent);
+  --crepe-color-error: #d33;
+  --crepe-color-hover: var(--ui-accent-soft);
+  --crepe-color-selected: var(--ui-selection);
+  --crepe-color-inline-area: var(--ui-code-bg);
+  --crepe-font-title: inherit;
+  --crepe-font-default: inherit;
+  --crepe-font-code: 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  background: var(--ui-bg);
+  color: var(--ui-fg);
+}
+.lumen-wysiwyg .milkdown .ProseMirror {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2.2rem 1.5rem 6rem;
+  line-height: 1.6;
+  font-size: 15.5px;
+}
+.lumen-wysiwyg .milkdown .ProseMirror table {
+  display: block;
+  overflow-x: auto;
+}
+.lumen-wysiwyg .milkdown .ProseMirror td,
+.lumen-wysiwyg .milkdown .ProseMirror th {
+  border: 1px solid var(--ui-border);
+}
+.lumen-wysiwyg .milkdown .ProseMirror th {
+  background: var(--ui-code-bg);
+}
+.lumen-mermaid-preview {
+  padding: 0.5rem;
+  text-align: center;
+}
+.lumen-mermaid-preview svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.lumen-frontmatter {
+  border: 1px dashed var(--ui-border);
+  border-radius: 6px;
+  margin: 0 0 1.2rem;
+  overflow: hidden;
+}
+.lumen-frontmatter-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+  background: var(--ui-chrome);
+  border: 0;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.lumen-frontmatter-toggle::before {
+  content: '▾ ';
+}
+.lumen-frontmatter.collapsed .lumen-frontmatter-toggle::before {
+  content: '▸ ';
+}
+.lumen-frontmatter pre {
+  margin: 0;
+  padding: 8px 12px;
+  background: transparent;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+}
+.lumen-frontmatter.collapsed pre {
+  display: none;
+}
+
+/* CodeMirror (vista fuente) */
+.lumen-source .cm-editor {
+  min-height: 100%;
+  font-size: 14px;
+}
+.lumen-source .cm-scroller {
+  font-family: 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  line-height: 1.55;
+  padding: 1rem 0 4rem;
+}
+.lumen-source .cm-content {
+  max-width: 90ch;
+}
+.lumen-source .cm-gutters {
+  background: var(--ui-chrome);
+  color: var(--ui-muted);
+  border-right: 1px solid var(--ui-border);
+}

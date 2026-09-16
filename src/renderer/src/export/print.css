@@ -1,0 +1,223 @@
+/* Hoja de estilos del HTML exportado y del PDF. Autocontenida: sin fuentes externas. */
+:root {
+  color-scheme: light;
+  --fg: #1c1c1c;
+  --muted: #666;
+  --bg: #fff;
+  --border: #d9d9d9;
+  --code-bg: #f4f4f4;
+  --accent: #2f5fd0;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.lumen-doc {
+  max-width: 76ch;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.25;
+  margin: 1.8em 0 0.6em;
+  font-weight: 650;
+}
+h1 {
+  font-size: 2em;
+  margin-top: 0.4em;
+}
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25em;
+}
+h3 {
+  font-size: 1.2em;
+}
+p,
+ul,
+ol,
+blockquote,
+table,
+pre {
+  margin: 0 0 1em;
+}
+a {
+  color: var(--accent);
+}
+blockquote {
+  border-left: 4px solid var(--border);
+  padding: 0.2em 1em;
+  color: var(--muted);
+  margin-left: 0;
+}
+code {
+  font-family: 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.92em;
+  background: var(--code-bg);
+  padding: 0.12em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--code-bg);
+  padding: 0.9em 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.88em;
+}
+pre.frontmatter {
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--muted);
+}
+pre.frontmatter::before {
+  content: 'frontmatter';
+  display: block;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4em;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+  font-size: 0.95em;
+}
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 0.45em 0.7em;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--code-bg);
+  font-weight: 650;
+}
+tr:nth-child(even) td {
+  background: #fafafa;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+ul.contains-task-list {
+  list-style: none;
+  padding-left: 0.4em;
+}
+.task-list-item input {
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+.mermaid {
+  text-align: center;
+  margin: 1em 0;
+}
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* highlight.js (tema claro, sobrio) */
+.hljs-comment,
+.hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #d73a49;
+}
+.hljs-string,
+.hljs-attr,
+.hljs-regexp {
+  color: #032f62;
+}
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable {
+  color: #005cc5;
+}
+.hljs-title,
+.hljs-section,
+.hljs-name {
+  color: #6f42c1;
+}
+.hljs-type,
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #e36209;
+}
+.hljs-meta {
+  color: #735c0f;
+}
+@page {
+  size: A4;
+  margin: 18mm 16mm;
+}
+@media print {
+  body {
+    font-size: 11pt;
+  }
+  .lumen-doc {
+    max-width: none;
+    padding: 0;
+  }
+  h1 {
+    page-break-before: auto;
+  }
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+  pre,
+  table,
+  blockquote,
+  .mermaid,
+  img {
+    page-break-inside: avoid;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: var(--muted);
+  }
+}

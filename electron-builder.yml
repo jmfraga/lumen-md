@@ -1,0 +1,68 @@
+appId: mx.docfraga.lumen
+productName: Lumen
+copyright: Copyright © 2026 Juan Manuel Fraga Sastrías
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!tests/*'
+  - '!docs/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,ROADMAP.md,vitest.config.ts}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - resources/**
+fileAssociations:
+  - ext: md
+    name: Markdown
+    description: Documento Markdown
+    role: Editor
+    mimeType: text/markdown
+  - ext: markdown
+    name: Markdown
+    description: Documento Markdown
+    role: Editor
+    mimeType: text/markdown
+win:
+  executableName: Lumen
+  target:
+    - nsis
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [universal]
+    - target: zip
+      arch: [universal]
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # La notarización se activa solo si el CI encuentra las credenciales (ver release.yml).
+  notarize: false
+dmg:
+  artifactName: ${name}-${version}.${ext}
+linux:
+  target:
+    - AppImage
+    - deb
+  maintainer: Juan Manuel Fraga Sastrías <jmfraga@emergencias.com.mx>
+  category: Office
+  mimeTypes:
+    - text/markdown
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
+publish:
+  provider: github
+  owner: jmfraga
+  repo: lumen-md
