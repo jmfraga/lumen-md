@@ -1,6 +1,6 @@
 {
   "name": "lumen-md",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Lector y editor Markdown WYSIWYG, libre y multiplataforma",
   "main": "./out/main/index.js",
   "author": "Juan Manuel Fraga Sastrías",
