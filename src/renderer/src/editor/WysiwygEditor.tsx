@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Crepe } from '@milkdown/crepe'
+import { editorViewCtx } from '@milkdown/kit/core'
 import { frontmatter } from './frontmatter'
 import { configureSerialization, postProcessMarkdown } from './serialization'
 import { renderMermaid } from './mermaid'
@@ -46,6 +47,14 @@ export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.
         [Crepe.Feature.Latex]: true
       },
       featureConfigs: {
+        [Crepe.Feature.Toolbar]: {
+          boldLabel: 'Negritas',
+          italicLabel: 'Cursivas',
+          strikethroughLabel: 'Tachado',
+          codeLabel: 'Código en línea',
+          latexLabel: 'Fórmula LaTeX',
+          linkLabel: 'Enlace'
+        },
         [Crepe.Feature.Placeholder]: { text: 'Escribe aquí…', mode: 'doc' },
         [Crepe.Feature.CodeMirror]: {
           renderPreview: (language, content, applyPreview) => {
@@ -77,7 +86,11 @@ export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.
     })
 
     void crepe.create().then(() => {
-      if (destroyed) void crepe.destroy()
+      if (destroyed) return void crepe.destroy()
+      // Gancho de diagnóstico (capturas automatizadas, depuración desde DevTools).
+      crepe.editor.action((ctx) => {
+        ;(window as unknown as { __lumen?: unknown }).__lumen = { view: ctx.get(editorViewCtx) }
+      })
     })
 
     return () => {

@@ -157,7 +157,8 @@ body {
   --crepe-color-on-background: var(--ui-fg);
   --crepe-color-surface: var(--ui-chrome);
   --crepe-color-surface-low: var(--ui-code-bg);
-  --crepe-color-outline: var(--ui-border);
+  /* Crepe usa outline para ICONOS (barra flotante, menús), no solo bordes: debe tener contraste. */
+  --crepe-color-outline: var(--ui-muted);
   --crepe-color-primary: var(--ui-accent);
   --crepe-color-secondary: var(--ui-accent-soft);
   --crepe-color-on-secondary: var(--ui-fg);
@@ -173,6 +174,21 @@ body {
   --crepe-font-code: 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   background: var(--ui-bg);
   color: var(--ui-fg);
+}
+/* Barra flotante de formato: iconos legibles y activo bien marcado. */
+.lumen-wysiwyg .milkdown .milkdown-toolbar {
+  border: 1px solid var(--ui-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+.lumen-wysiwyg .milkdown .milkdown-toolbar .toolbar-item svg {
+  color: var(--ui-fg);
+  fill: var(--ui-fg);
+}
+.lumen-wysiwyg .milkdown .milkdown-toolbar .toolbar-item.active {
+  background: var(--ui-accent-soft);
+}
+.lumen-wysiwyg .milkdown .milkdown-toolbar .divider {
+  background: var(--ui-border);
 }
 .lumen-wysiwyg .milkdown .ProseMirror {
   max-width: var(--measure);

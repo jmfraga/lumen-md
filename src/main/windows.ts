@@ -89,18 +89,30 @@ export function createWindow(filePath: string | null = null): BrowserWindow {
   // Herramienta de desarrollo/CI: LUMEN_SCREENSHOT=/ruta.png captura la ventana y sale.
   const shotPath = process.env['LUMEN_SCREENSHOT']
   if (shotPath) {
+    // LUMEN_THEME=dark|light fuerza el tema en capturas.
+    const theme = process.env['LUMEN_THEME']
+    if (theme === 'dark' || theme === 'light') nativeTheme.themeSource = theme
     win.webContents.once('did-finish-load', () => {
-      setTimeout(async () => {
-        try {
-          const image = await win.webContents.capturePage()
-          await writeFile(shotPath, image.toPNG())
-          console.log(`[lumen] captura guardada en ${shotPath}`)
-        } catch (err) {
-          console.error('[lumen] captura falló', err)
-        } finally {
-          app.exit(0)
-        }
-      }, Number(process.env['LUMEN_SCREENSHOT_DELAY'] ?? 2500))
+      setTimeout(
+        async () => {
+          try {
+            // LUMEN_SCREENSHOT_JS: código a ejecutar antes de capturar (p. ej. seleccionar texto).
+            const pre = process.env['LUMEN_SCREENSHOT_JS']
+            if (pre) {
+              console.log('[lumen] pre-js →', await win.webContents.executeJavaScript(pre))
+              await new Promise((r) => setTimeout(r, 600))
+            }
+            const image = await win.webContents.capturePage()
+            await writeFile(shotPath, image.toPNG())
+            console.log(`[lumen] captura guardada en ${shotPath}`)
+          } catch (err) {
+            console.error('[lumen] captura falló', err)
+          } finally {
+            app.exit(0)
+          }
+        },
+        Number(process.env['LUMEN_SCREENSHOT_DELAY'] ?? 2500)
+      )
     })
   }
 
