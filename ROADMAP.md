@@ -1,10 +1,10 @@
 # Roadmap
 
-## v0.2 (en curso)
+## v0.2 (completada 2026-09-17)
 
 - [x] Botón "Insertar" permanente con menú de bloques en español y selector de tabla
 - [x] Imágenes desde archivo y desde el portapapeles, copiadas a `assets/` junto al `.md`
-- [ ] Asistente visual de diagramas Mermaid (flujo y secuencia) con vista previa
+- [x] Asistente visual de diagramas Mermaid (flujo y secuencia) con vista previa
 
 ## Después
 

@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DocumentStore, useDocument } from './state/document'
 import { WysiwygEditor } from './editor/WysiwygEditor'
 import type { WysiwygHandle } from './editor/WysiwygEditor'
-import { insert, insertTable } from './editor/insert'
+import { insert, insertTable, insertCodeBlockWithContent } from './editor/insert'
 import type { InsertKind } from './editor/insert'
 import { SourceEditor } from './editor/SourceEditor'
 import { buildExportHtml } from './export'
 import { TopBar } from './ui/TopBar'
 import { StatusBar } from './ui/StatusBar'
 import { DropOverlay } from './ui/DropOverlay'
+import { MermaidWizard } from './ui/MermaidWizard'
 import type { MenuCommand } from '../../shared/ipc'
 
 function dirOf(path: string | null): string | null {
@@ -35,6 +36,7 @@ export default function App(): React.JSX.Element {
   /** Cambia para forzar el remontado de los editores al cargar otro documento o cambiar de modo. */
   const [epoch, setEpoch] = useState(0)
   const [dragging, setDragging] = useState(false)
+  const [wizard, setWizard] = useState(false)
   const busy = useRef(false)
   const editorRef = useRef<WysiwygHandle>(null)
 
@@ -180,10 +182,14 @@ export default function App(): React.JSX.Element {
 
   const onChange = useCallback((text: string) => store.update(text), [store])
   const onStatus = useCallback((msg: string) => store.setStatus(msg), [store])
-  const onInsert = useCallback(
-    (kind: InsertKind) => editorRef.current?.run((ctx) => insert(ctx, kind)),
-    []
-  )
+  const onInsert = useCallback((kind: InsertKind) => {
+    if (kind === 'mermaid') return setWizard(true)
+    editorRef.current?.run((ctx) => insert(ctx, kind))
+  }, [])
+  const onInsertMermaid = useCallback((code: string) => {
+    setWizard(false)
+    editorRef.current?.run((ctx) => insertCodeBlockWithContent(ctx, 'mermaid', code))
+  }, [])
   const onInsertTable = useCallback(
     (rows: number, cols: number) => editorRef.current?.run((ctx) => insertTable(ctx, rows, cols)),
     []
@@ -228,6 +234,7 @@ export default function App(): React.JSX.Element {
         mode={doc.mode}
         text={doc.text}
       />
+      {wizard && <MermaidWizard onInsert={onInsertMermaid} onClose={() => setWizard(false)} />}
       {dragging && <DropOverlay />}
     </div>
   )
