@@ -94,6 +94,86 @@ body {
   background: var(--ui-accent);
   color: #fff;
 }
+.lumen-insert {
+  position: relative;
+}
+.lumen-insert > button {
+  font-weight: 600;
+}
+.lumen-insert > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.lumen-insert-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  min-width: 240px;
+  background: var(--ui-bg);
+  color: var(--ui-fg);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  padding: 6px;
+  -webkit-app-region: no-drag;
+}
+.lumen-insert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ui-fg);
+  cursor: pointer;
+}
+.lumen-insert-item:hover {
+  background: var(--ui-accent-soft);
+}
+.lumen-insert-item code {
+  font-size: 11px;
+  color: var(--ui-muted);
+  background: var(--ui-code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.lumen-insert-sep {
+  height: 1px;
+  background: var(--ui-border);
+  margin: 5px 4px;
+}
+.lumen-insert-table {
+  padding: 4px 10px 6px;
+}
+.lumen-insert-label {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.lumen-insert-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 18px);
+  gap: 3px;
+}
+.lumen-insert-grid button {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--ui-border);
+  border-radius: 3px;
+  background: var(--ui-chrome);
+  cursor: pointer;
+}
+.lumen-insert-grid button.on {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
 .lumen-sep {
   width: 1px;
   height: 18px;

@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
+import type { Ctx } from '@milkdown/kit/ctx'
 import { Crepe } from '@milkdown/crepe'
 import { editorViewCtx } from '@milkdown/kit/core'
 import { frontmatter } from './frontmatter'
 import { configureSerialization, postProcessMarkdown } from './serialization'
+import { insertCodeBlockWithContent, MERMAID_TEMPLATE } from './insert'
 import { renderMermaid } from './mermaid'
 import { resolveAssetUrl } from '../export/assets'
 
@@ -18,9 +20,26 @@ interface Props {
   onChange: (markdown: string) => void
 }
 
+export interface WysiwygHandle {
+  /** Ejecuta una acción con el ctx de Milkdown (inserciones, comandos). */
+  run: (fn: (ctx: Ctx) => void) => void
+}
+
 /** Milkdown Crepe. Se monta una vez por documento; el texto vive en DocumentStore. */
-export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.JSX.Element {
+export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEditor(
+  { initialText, baseDir, onChange },
+  ref
+): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement>(null)
+  const crepeRef = useRef<Crepe | null>(null)
+
+  useImperativeHandle(ref, () => ({
+    run: (fn) => {
+      const crepe = crepeRef.current
+      if (!crepe) return
+      crepe.editor.action(fn)
+    }
+  }))
   const onChangeRef = useRef(onChange)
   useEffect(() => {
     onChangeRef.current = onChange
@@ -40,6 +59,8 @@ export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.
     const interactionEvents = ['keydown', 'paste', 'drop', 'pointerdown', 'cut'] as const
     interactionEvents.forEach((ev) => root.addEventListener(ev, markInteracted, true))
 
+    const MERMAID_ICON =
+      '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="7" height="5" rx="1"/><rect x="14" y="4" width="7" height="5" rx="1"/><rect x="8.5" y="15" width="7" height="5" rx="1"/><path d="M6.5 9v3h11V9M12 12v3"/></svg>'
     const crepe = new Crepe({
       root,
       defaultValue: initialText,
@@ -54,6 +75,40 @@ export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.
           codeLabel: 'Código en línea',
           latexLabel: 'Fórmula LaTeX',
           linkLabel: 'Enlace'
+        },
+        [Crepe.Feature.BlockEdit]: {
+          textGroup: {
+            label: 'Texto',
+            text: { label: 'Texto normal' },
+            h1: { label: 'Título 1' },
+            h2: { label: 'Título 2' },
+            h3: { label: 'Título 3' },
+            h4: { label: 'Título 4' },
+            h5: { label: 'Título 5' },
+            h6: { label: 'Título 6' },
+            quote: { label: 'Cita' },
+            divider: { label: 'Separador' }
+          },
+          listGroup: {
+            label: 'Listas',
+            bulletList: { label: 'Lista con viñetas' },
+            orderedList: { label: 'Lista numerada' },
+            taskList: { label: 'Lista de tareas' }
+          },
+          advancedGroup: {
+            label: 'Bloques',
+            image: { label: 'Imagen' },
+            codeBlock: { label: 'Bloque de código' },
+            table: { label: 'Tabla' },
+            math: { label: 'Fórmula LaTeX' }
+          },
+          buildMenu: (builder) => {
+            builder.getGroup('advanced').addItem('mermaid', {
+              label: 'Diagrama Mermaid',
+              icon: MERMAID_ICON,
+              onRun: (ctx) => insertCodeBlockWithContent(ctx, 'mermaid', MERMAID_TEMPLATE)
+            })
+          }
         },
         [Crepe.Feature.Placeholder]: { text: 'Escribe aquí…', mode: 'doc' },
         [Crepe.Feature.CodeMirror]: {
@@ -79,6 +134,7 @@ export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.
 
     crepe.editor.use(frontmatter)
     configureSerialization(crepe.editor)
+    crepeRef.current = crepe
     crepe.on((listener) => {
       listener.markdownUpdated((_ctx, markdown, prev) => {
         if (userInteracted && markdown !== prev) onChangeRef.current(postProcessMarkdown(markdown))
@@ -103,4 +159,4 @@ export function WysiwygEditor({ initialText, baseDir, onChange }: Props): React.
   }, [])
 
   return <div ref={rootRef} className="lumen-wysiwyg" />
-}
+})

@@ -1,4 +1,6 @@
 import type { ViewMode } from '../state/document'
+import { InsertMenu } from './InsertMenu'
+import type { InsertKind } from '../editor/insert'
 
 interface Props {
   name: string
@@ -9,6 +11,8 @@ interface Props {
   onSave: () => void
   onExportHtml: () => void
   onExportPdf: () => void
+  onInsert: (kind: InsertKind) => void
+  onInsertTable: (rows: number, cols: number) => void
 }
 
 export function TopBar(p: Props): React.JSX.Element {
@@ -19,6 +23,12 @@ export function TopBar(p: Props): React.JSX.Element {
         {p.name}
       </div>
       <div className="lumen-topbar-actions">
+        <InsertMenu
+          disabled={p.mode !== 'wysiwyg'}
+          onInsert={p.onInsert}
+          onInsertTable={p.onInsertTable}
+        />
+        <span className="lumen-sep" />
         <button type="button" onClick={p.onOpen} title="Abrir (⌘O)">
           Abrir
         </button>

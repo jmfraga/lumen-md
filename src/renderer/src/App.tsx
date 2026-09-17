@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DocumentStore, useDocument } from './state/document'
 import { WysiwygEditor } from './editor/WysiwygEditor'
+import type { WysiwygHandle } from './editor/WysiwygEditor'
+import { insert, insertTable } from './editor/insert'
+import type { InsertKind } from './editor/insert'
 import { SourceEditor } from './editor/SourceEditor'
 import { buildExportHtml } from './export'
 import { TopBar } from './ui/TopBar'
@@ -33,6 +36,7 @@ export default function App(): React.JSX.Element {
   const [epoch, setEpoch] = useState(0)
   const [dragging, setDragging] = useState(false)
   const busy = useRef(false)
+  const editorRef = useRef<WysiwygHandle>(null)
 
   const loadPath = useCallback(
     async (path: string) => {
@@ -175,6 +179,14 @@ export default function App(): React.JSX.Element {
   }, [store, loadPath])
 
   const onChange = useCallback((text: string) => store.update(text), [store])
+  const onInsert = useCallback(
+    (kind: InsertKind) => editorRef.current?.run((ctx) => insert(ctx, kind)),
+    []
+  )
+  const onInsertTable = useCallback(
+    (rows: number, cols: number) => editorRef.current?.run((ctx) => insertTable(ctx, rows, cols)),
+    []
+  )
 
   if (!loaded) return <div className="lumen-app" />
 
@@ -189,10 +201,13 @@ export default function App(): React.JSX.Element {
         onSave={() => void save()}
         onExportHtml={() => void exportAs('html')}
         onExportPdf={() => void exportAs('pdf')}
+        onInsert={onInsert}
+        onInsertTable={onInsertTable}
       />
       <main className="lumen-main">
         {doc.mode === 'wysiwyg' ? (
           <WysiwygEditor
+            ref={editorRef}
             key={`w${epoch}`}
             initialText={doc.text}
             baseDir={dirOf(doc.path)}

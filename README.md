@@ -9,6 +9,7 @@ tablas que no se rompen, código con colores, diagramas Mermaid, fórmulas LaTeX
 - **WYSIWYG** con [Milkdown](https://milkdown.dev): escribes y ves el resultado; las tablas se editan como tablas.
 - **Vista de fuente** (`Cmd/Ctrl+/`) con CodeMirror para ver y corregir el Markdown crudo.
 - **Tablas GFM, listas de tareas, código con resaltado, Mermaid, KaTeX, frontmatter YAML** (se conserva intacto al guardar).
+- **Botón "Insertar"** (o `/` en una línea vacía) para crear títulos, listas, tablas con selector de filas y columnas, código, diagramas Mermaid, fórmulas e imágenes sin saber Markdown.
 - **Doble clic** sobre un `.md` lo abre; una ventana por documento; arrastrar y soltar; recientes.
 - **Autoguardado** (se puede apagar en el menú Archivo).
 - **Exportar a HTML** autocontenido y **a PDF**.
