@@ -179,6 +179,7 @@ export default function App(): React.JSX.Element {
   }, [store, loadPath])
 
   const onChange = useCallback((text: string) => store.update(text), [store])
+  const onStatus = useCallback((msg: string) => store.setStatus(msg), [store])
   const onInsert = useCallback(
     (kind: InsertKind) => editorRef.current?.run((ctx) => insert(ctx, kind)),
     []
@@ -211,7 +212,9 @@ export default function App(): React.JSX.Element {
             key={`w${epoch}`}
             initialText={doc.text}
             baseDir={dirOf(doc.path)}
+            docPath={doc.path}
             onChange={onChange}
+            onStatus={onStatus}
           />
         ) : (
           <SourceEditor key={`s${epoch}`} initialText={doc.text} onChange={onChange} />

@@ -17,6 +17,13 @@ export interface ExportResult {
   error?: string
 }
 
+export interface AssetResult {
+  ok: boolean
+  /** Ruta relativa al documento, lista para el Markdown (p. ej. `assets/foto.png`). */
+  relPath?: string
+  error?: string
+}
+
 export interface Preferences {
   autosave: boolean
 }
@@ -34,6 +41,13 @@ export interface LumenApi {
   saveFileAs(content: string, suggestedName?: string): Promise<SaveResult>
   exportHtml(html: string, suggestedName?: string): Promise<ExportResult>
   exportPdf(html: string, suggestedName?: string): Promise<ExportResult>
+  /** Copia una imagen a `assets/` junto al documento y devuelve la ruta relativa. */
+  saveAsset(
+    docPath: string,
+    name: string | null,
+    mime: string,
+    data: ArrayBuffer
+  ): Promise<AssetResult>
   getPreferences(): Promise<Preferences>
   setPreferences(prefs: Partial<Preferences>): Promise<Preferences>
   /** El renderer avisa si tiene cambios sin guardar (para el aviso al cerrar). */
@@ -66,6 +80,7 @@ export const IPC = {
   saveFileAs: 'lumen:save-file-as',
   exportHtml: 'lumen:export-html',
   exportPdf: 'lumen:export-pdf',
+  saveAsset: 'lumen:save-asset',
   getPreferences: 'lumen:get-preferences',
   setPreferences: 'lumen:set-preferences',
   setDirty: 'lumen:set-dirty',

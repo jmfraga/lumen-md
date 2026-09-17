@@ -5,6 +5,7 @@ import { editorViewCtx } from '@milkdown/kit/core'
 import { frontmatter } from './frontmatter'
 import { configureSerialization, postProcessMarkdown } from './serialization'
 import { insertCodeBlockWithContent, MERMAID_TEMPLATE } from './insert'
+import { saveImageAsset, imageFilesFromClipboard, insertImageBlock } from './image-upload'
 import { renderMermaid } from './mermaid'
 import { resolveAssetUrl } from '../export/assets'
 
@@ -17,7 +18,11 @@ interface Props {
   initialText: string
   /** Directorio del documento, para resolver imágenes relativas. */
   baseDir: string | null
+  /** Ruta del documento; necesaria para copiar imágenes a assets/. */
+  docPath: string | null
   onChange: (markdown: string) => void
+  /** Mensajes para la barra de estado (errores de imagen, etc.). */
+  onStatus?: (msg: string) => void
 }
 
 export interface WysiwygHandle {
@@ -27,7 +32,7 @@ export interface WysiwygHandle {
 
 /** Milkdown Crepe. Se monta una vez por documento; el texto vive en DocumentStore. */
 export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEditor(
-  { initialText, baseDir, onChange },
+  { initialText, baseDir, docPath, onChange, onStatus },
   ref
 ): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -41,9 +46,13 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
     }
   }))
   const onChangeRef = useRef(onChange)
+  const onStatusRef = useRef(onStatus)
+  const docPathRef = useRef(docPath)
   useEffect(() => {
     onChangeRef.current = onChange
-  }, [onChange])
+    onStatusRef.current = onStatus
+    docPathRef.current = docPath
+  }, [onChange, onStatus, docPath])
 
   useEffect(() => {
     const root = rootRef.current
@@ -61,6 +70,35 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
 
     const MERMAID_ICON =
       '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="7" height="5" rx="1"/><rect x="14" y="4" width="7" height="5" rx="1"/><rect x="8.5" y="15" width="7" height="5" rx="1"/><path d="M6.5 9v3h11V9M12 12v3"/></svg>'
+    const upload = async (file: File): Promise<string> => {
+      try {
+        const rel = await saveImageAsset(file, docPathRef.current)
+        onStatusRef.current?.(`Imagen guardada en ${rel}`)
+        return rel
+      } catch (err) {
+        onStatusRef.current?.(err instanceof Error ? err.message : String(err))
+        throw err
+      }
+    }
+    // Pegar una imagen del portapapeles: se guarda en assets/ y se inserta como bloque.
+    const onPaste = (e: ClipboardEvent): void => {
+      const files = imageFilesFromClipboard(e.clipboardData)
+      if (!files.length) return
+      e.preventDefault()
+      e.stopPropagation()
+      void (async () => {
+        for (const f of files) {
+          try {
+            const rel = await upload(f)
+            crepe.editor.action((ctx) => insertImageBlock(ctx, rel))
+          } catch {
+            /* ya se informó en la barra de estado */
+          }
+        }
+      })()
+    }
+    root.addEventListener('paste', onPaste, true)
+
     const crepe = new Crepe({
       root,
       defaultValue: initialText,
@@ -127,7 +165,17 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
           previewOnlyByDefault: true
         },
         [Crepe.Feature.ImageBlock]: {
-          proxyDomURL: (url: string) => resolveAssetUrl(url, baseDir)
+          proxyDomURL: (url: string) => resolveAssetUrl(url, baseDir),
+          onUpload: upload,
+          blockOnUpload: upload,
+          inlineOnUpload: upload,
+          blockUploadButton: 'Elegir archivo…',
+          blockUploadPlaceholderText: 'Pega un enlace o elige una imagen',
+          blockCaptionPlaceholderText: 'Pie de imagen',
+          blockConfirmButton: 'Aceptar',
+          inlineUploadButton: 'Elegir archivo…',
+          inlineUploadPlaceholderText: 'Pega un enlace o elige una imagen',
+          inlineConfirmButton: 'Aceptar'
         }
       }
     })

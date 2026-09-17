@@ -11,4 +11,5 @@ abrir → serializar en Milkdown, normalizando solo:
 
 Cualquier otra diferencia es un bug, salvo las listadas aquí con su razón:
 
-(ninguna todavía)
+- comillas del título de imagen o enlace: `'título'` ≡ `"título"`
+- imágenes solas en un párrafo: si la imagen fue redimensionada en Lumen y además tenía texto alternativo, se conserva el texto y se pierde la proporción (Milkdown guarda la proporción en el alt; Lumen prioriza el texto)

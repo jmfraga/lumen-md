@@ -19,6 +19,8 @@ export function normalize(md: string): string {
       .replace(/\r\n?/g, '\n')
       .split('\n')
       .map((l) => l.replace(/[ \t]+$/, ''))
+      // Título de imagen/enlace: 'x' y "x" son equivalentes en Markdown.
+      .map((l) => l.replace(/\((\S+) '([^']*)'\)/g, '($1 "$2")'))
       // Filas de tabla: el relleno de espacios y el largo de los guiones no cambian el contenido.
       .map((l) =>
         /^\s*\|.*\|\s*$/.test(l) ? l.replace(/\s*\|\s*/g, '|').replace(/-{2,}/g, '-') : l

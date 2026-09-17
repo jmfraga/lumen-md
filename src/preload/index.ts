@@ -12,6 +12,8 @@ const lumen: LumenApi = {
     ipcRenderer.invoke(IPC.saveFileAs, content, suggestedName),
   exportHtml: (html, suggestedName) => ipcRenderer.invoke(IPC.exportHtml, html, suggestedName),
   exportPdf: (html, suggestedName) => ipcRenderer.invoke(IPC.exportPdf, html, suggestedName),
+  saveAsset: (docPath, name, mime, data) =>
+    ipcRenderer.invoke(IPC.saveAsset, docPath, name, mime, data),
   getPreferences: () => ipcRenderer.invoke(IPC.getPreferences),
   setPreferences: (prefs: Partial<Preferences>) => ipcRenderer.invoke(IPC.setPreferences, prefs),
   setDirty: (dirty) => ipcRenderer.send(IPC.setDirty, dirty),

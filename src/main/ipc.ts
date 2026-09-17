@@ -1,8 +1,10 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile, writeFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
 import { basename, dirname, join } from 'path'
 import { IPC } from '../shared/ipc'
-import type { OpenedFile, SaveResult, ExportResult, Preferences } from '../shared/ipc'
+import type { OpenedFile, SaveResult, ExportResult, Preferences, AssetResult } from '../shared/ipc'
+import { ASSETS_DIR, uniqueAssetName } from '../shared/assets'
 import { createWindow, setWindowDirty, setWindowPath, stateOf } from './windows'
 import { addRecent, getPreferences, setPreferences } from './store'
 import { writeHtml, writePdf } from './export'
@@ -152,6 +154,27 @@ export function registerIpc(): void {
       try {
         await writePdf(result.filePath, html)
         return { ok: true, path: result.filePath }
+      } catch (err) {
+        return { ok: false, error: String(err) }
+      }
+    }
+  )
+
+  ipcMain.handle(
+    IPC.saveAsset,
+    async (
+      _e,
+      docPath: string,
+      name: string | null,
+      mime: string,
+      data: ArrayBuffer
+    ): Promise<AssetResult> => {
+      try {
+        const dir = join(dirname(docPath), ASSETS_DIR)
+        await mkdir(dir, { recursive: true })
+        const fileName = uniqueAssetName(name, mime, (c) => existsSync(join(dir, c)))
+        await writeFile(join(dir, fileName), Buffer.from(data))
+        return { ok: true, relPath: `${ASSETS_DIR}/${fileName}` }
       } catch (err) {
         return { ok: false, error: String(err) }
       }
