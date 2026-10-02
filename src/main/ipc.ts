@@ -9,6 +9,14 @@ import { createWindow, setWindowDirty, setWindowPath, stateOf } from './windows'
 import { addRecent, getPreferences, setPreferences } from './store'
 import { writeHtml, writePdf } from './export'
 import { rebuildMenu } from './menu'
+import {
+  checkForUpdates,
+  downloadUpdate,
+  getUpdateState,
+  installUpdate,
+  openFeedback,
+  openReleasePage
+} from './updater'
 
 const MD_FILTERS = [{ name: 'Markdown', extensions: ['md', 'markdown', 'mdx', 'txt'] }]
 
@@ -180,6 +188,13 @@ export function registerIpc(): void {
       }
     }
   )
+
+  ipcMain.handle(IPC.getUpdateState, () => getUpdateState())
+  ipcMain.handle(IPC.checkForUpdates, () => checkForUpdates(true))
+  ipcMain.handle(IPC.downloadUpdate, () => downloadUpdate())
+  ipcMain.handle(IPC.installUpdate, () => installUpdate())
+  ipcMain.on(IPC.openReleasePage, (_e, url?: string) => openReleasePage(url))
+  ipcMain.on(IPC.openFeedback, (_e, kind: 'mejora' | 'problema') => openFeedback(kind))
 
   ipcMain.handle(IPC.getPreferences, (): Preferences => getPreferences())
   ipcMain.handle(IPC.setPreferences, (_e, patch: Partial<Preferences>): Preferences => {

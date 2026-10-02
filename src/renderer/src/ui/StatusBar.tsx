@@ -24,6 +24,14 @@ export function StatusBar(p: Props): React.JSX.Element {
         {p.status && <span className="lumen-status-msg">{p.status}</span>}
         <span>{countWords(p.text)} palabras</span>
         <span>{p.mode === 'source' ? 'Fuente' : 'WYSIWYG'}</span>
+        <button
+          type="button"
+          className="lumen-status-feedback"
+          onClick={() => window.lumen.openFeedback('mejora')}
+          title="Abre GitHub para proponer una mejora (necesitas una cuenta gratuita)"
+        >
+          💡 Sugerir mejora
+        </button>
         <span title="Autoguardado">
           {p.autosave ? 'Auto ✓' : p.dirty ? 'Sin guardar' : 'Manual'}
         </span>

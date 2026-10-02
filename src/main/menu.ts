@@ -3,7 +3,8 @@ import type { MenuItemConstructorOptions } from 'electron'
 import { basename } from 'path'
 import { createWindow } from './windows'
 import { openPathInWindow, openFileDialog } from './ipc'
-import { clearRecents, getPreferences, getRecents } from './store'
+import { clearRecents, getPreferences, getRecents, setPreferences } from './store'
+import { checkForUpdates, openFeedback } from './updater'
 
 const isMac = process.platform === 'darwin'
 
@@ -40,6 +41,7 @@ export function buildMenu(): Menu {
             label: app.name,
             submenu: [
               { role: 'about' as const },
+              { label: 'Buscar actualizaciones…', click: () => void checkForUpdates(true) },
               { type: 'separator' as const },
               { role: 'services' as const },
               { type: 'separator' as const },
@@ -122,9 +124,36 @@ export function buildMenu(): Menu {
     {
       role: 'help',
       submenu: [
+        { label: '💡 Proponer una mejora…', click: () => openFeedback('mejora') },
+        { label: '🐞 Reportar un problema…', click: () => openFeedback('problema') },
+        {
+          label: 'Ver propuestas de la comunidad',
+          click: () => shell.openExternal('https://github.com/jmfraga/lumen-md/issues')
+        },
+        { type: 'separator' as const },
+        ...(isMac
+          ? []
+          : [{ label: 'Buscar actualizaciones…', click: () => void checkForUpdates(true) }]),
+        {
+          label: 'Revisar actualizaciones automáticamente',
+          type: 'checkbox' as const,
+          checked: prefs.checkUpdates,
+          click: () => {
+            setPreferences({ checkUpdates: !getPreferences().checkUpdates })
+            rebuildMenu()
+          }
+        },
+        { type: 'separator' as const },
         {
           label: 'Lumen en GitHub',
           click: () => shell.openExternal('https://github.com/jmfraga/lumen-md')
+        },
+        {
+          label: 'Novedades de esta versión',
+          click: () =>
+            shell.openExternal(
+              `https://github.com/jmfraga/lumen-md/releases/tag/v${app.getVersion()}`
+            )
         }
       ]
     }

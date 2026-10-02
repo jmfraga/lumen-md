@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📥 Descargar la última versión
+    url: https://github.com/jmfraga/lumen-md/releases/latest
+    about: Instaladores para Mac, Windows y Linux.

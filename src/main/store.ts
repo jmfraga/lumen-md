@@ -11,7 +11,7 @@ interface StoreData {
 }
 
 const DEFAULTS: StoreData = {
-  preferences: { autosave: true },
+  preferences: { autosave: true, checkUpdates: true },
   recents: []
 }
 

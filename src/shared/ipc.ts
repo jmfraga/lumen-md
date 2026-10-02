@@ -1,5 +1,7 @@
 /** Contrato IPC entre main y renderer. Único punto de acuerdo entre ambos lados. */
 
+import type { UpdateState, FeedbackKind } from './update'
+
 export interface OpenedFile {
   path: string
   content: string
@@ -26,6 +28,8 @@ export interface AssetResult {
 
 export interface Preferences {
   autosave: boolean
+  /** Revisar actualizaciones al abrir y una vez al día. */
+  checkUpdates: boolean
 }
 
 /** API expuesta al renderer vía contextBridge como `window.lumen`. */
@@ -58,6 +62,15 @@ export interface LumenApi {
   onCommand(handler: (command: MenuCommand) => void): () => void
   /** Archivo soltado sobre la ventana (ruta resuelta por preload). */
   pathForFile(file: File): string
+  /** Actualizaciones. */
+  getUpdateState(): Promise<UpdateState>
+  checkForUpdates(): Promise<void>
+  downloadUpdate(): Promise<void>
+  installUpdate(): Promise<{ ok: boolean; reason?: 'dirty' | 'not-ready' }>
+  openReleasePage(url?: string): void
+  /** Abre GitHub con la plantilla de mejora o problema, con versión y sistema ya llenos. */
+  openFeedback(kind: FeedbackKind): void
+  onUpdateState(handler: (state: UpdateState) => void): () => void
   /** Main pide a una ventana vacía que cargue esta ruta. */
   onOpenPath(handler: (path: string) => void): () => void
 }
@@ -86,5 +99,12 @@ export const IPC = {
   setDirty: 'lumen:set-dirty',
   setCurrentPath: 'lumen:set-current-path',
   command: 'lumen:command',
+  updateState: 'lumen:update-state',
+  getUpdateState: 'lumen:get-update-state',
+  checkForUpdates: 'lumen:check-updates',
+  downloadUpdate: 'lumen:download-update',
+  installUpdate: 'lumen:install-update',
+  openReleasePage: 'lumen:open-release-page',
+  openFeedback: 'lumen:open-feedback',
   openPathEvent: 'lumen:open-path'
 } as const

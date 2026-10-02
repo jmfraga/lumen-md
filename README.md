@@ -53,7 +53,25 @@ Queda registrado como aplicación para `text/markdown`, así que el doble clic f
 
 ### Actualizar
 
-Descarga la versión nueva desde el mismo enlace e instálala encima. Tus preferencias se conservan. Por ahora no hay actualización automática (está en el [roadmap](ROADMAP.md)).
+Desde la versión 0.3.0, Lumen revisa si hay una versión nueva al abrirse y una vez al día. Si la hay, aparece una franja arriba del documento:
+
+1. **Descargar**: baja la actualización en segundo plano mientras sigues trabajando.
+2. **Reiniciar ahora**: guarda tu documento, se instala y Lumen vuelve a abrir. Si eliges **Al cerrar Lumen**, se instala la próxima vez que cierres la app.
+
+Nunca descarga ni instala sin que lo pidas. Puedes revisar a mano en **Lumen → Buscar actualizaciones…** (Mac) o **Ayuda → Buscar actualizaciones…** (Windows y Linux), y apagar la revisión automática en el menú Ayuda.
+
+En Linux, el AppImage se actualiza solo; con el `.deb` Lumen avisa y te lleva a la página de descargas.
+
+Si tienes una versión anterior a la 0.3.0, descarga esta una vez desde el enlace de arriba; de ahí en adelante te avisará sola.
+
+## Proponer mejoras y reportar problemas
+
+Las ideas y los problemas viven en los [issues del repositorio](https://github.com/jmfraga/lumen-md/issues), donde todos pueden verlos, comentarlos y votarlos con 👍. De ahí salen las versiones nuevas.
+
+- Desde la app: botón **💡 Sugerir mejora** en la barra inferior, o menú **Ayuda → Proponer una mejora… / Reportar un problema…**. Se abre GitHub con la plantilla en español y con tu versión y sistema ya llenos.
+- Desde el navegador: [proponer una mejora](https://github.com/jmfraga/lumen-md/issues/new?template=mejora.yml) o [reportar un problema](https://github.com/jmfraga/lumen-md/issues/new?template=problema.yml).
+
+Necesitas una cuenta gratuita de GitHub. No hace falta saber programar: cuéntalo como se lo contarías a un amigo.
 
 ## Para qué sirve
 
@@ -107,7 +125,9 @@ Descarga la versión nueva desde el mismo enlace e instálala encima. Tus prefer
 
 **¿Puedo usarlo con Obsidian?** Sí: abre los mismos `.md`; el frontmatter y los `[[wikilinks]]` se conservan.
 
-**Encontré un documento que Lumen altera al guardar.** Es un bug. Abre un [issue](https://github.com/jmfraga/lumen-md/issues) con el archivo (o un fragmento) y lo agregamos al corpus de fidelidad.
+**Encontré un documento que Lumen altera al guardar.** Es un bug. [Repórtalo](https://github.com/jmfraga/lumen-md/issues/new?template=problema.yml) con el fragmento original y lo agregamos al corpus de fidelidad.
+
+**¿Cómo sé qué versión tengo?** Menú **Lumen → Acerca de Lumen** en Mac, o **Ayuda → Novedades de esta versión**.
 
 ## Desarrollo
 

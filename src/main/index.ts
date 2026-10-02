@@ -6,6 +6,7 @@ import { resolve } from 'path'
 import { createWindow } from './windows'
 import { registerIpc, openPathInWindow } from './ipc'
 import { rebuildMenu } from './menu'
+import { initUpdater } from './updater'
 
 /**
  * Arranque. Tres formas de recibir un archivo:
@@ -75,6 +76,7 @@ if (!app.requestSingleInstanceLock()) {
     pendingPaths.length = 0
     if (initial.length) initial.forEach((p) => createWindow(p))
     else createWindow(null)
+    initUpdater()
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow(null)

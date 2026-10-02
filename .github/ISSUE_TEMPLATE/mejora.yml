@@ -1,0 +1,41 @@
+name: 💡 Proponer una mejora
+description: Una idea para que Lumen sea más útil.
+title: '[Mejora] '
+labels: ['mejora']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por la idea! Cuéntala como se la contarías a un amigo: no hace falta saber de programación.
+  - type: textarea
+    id: situacion
+    attributes:
+      label: ¿Qué estabas intentando hacer?
+      description: La situación real. Por ejemplo, "revisar un informe que me dio ChatGPT con muchas tablas".
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: ¿Qué te gustaría que hiciera Lumen?
+      description: Tu propuesta. Si tienes una captura o un ejemplo, arrástralo aquí.
+    validations:
+      required: true
+  - type: dropdown
+    id: importancia
+    attributes:
+      label: ¿Qué tanto te cambiaría el día?
+      options:
+        - Sería un detalle bonito
+        - Lo usaría seguido
+        - Hoy me impide usar Lumen para algo
+  - type: input
+    id: version
+    attributes:
+      label: Versión de Lumen
+      description: Se llena sola si abres esto desde Lumen (Ayuda → Proponer una mejora).
+  - type: input
+    id: sistema
+    attributes:
+      label: Sistema
+      description: Mac, Windows o Linux.

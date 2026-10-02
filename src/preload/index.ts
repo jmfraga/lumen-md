@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { IPC } from '../shared/ipc'
 import type { LumenApi, MenuCommand, Preferences } from '../shared/ipc'
+import type { UpdateState } from '../shared/update'
 
 const lumen: LumenApi = {
   getInitialFile: () => ipcRenderer.invoke(IPC.getInitialFile),
@@ -24,6 +25,17 @@ const lumen: LumenApi = {
     return () => ipcRenderer.removeListener(IPC.command, listener)
   },
   pathForFile: (file) => webUtils.getPathForFile(file),
+  getUpdateState: () => ipcRenderer.invoke(IPC.getUpdateState),
+  checkForUpdates: () => ipcRenderer.invoke(IPC.checkForUpdates),
+  downloadUpdate: () => ipcRenderer.invoke(IPC.downloadUpdate),
+  installUpdate: () => ipcRenderer.invoke(IPC.installUpdate),
+  openReleasePage: (url) => ipcRenderer.send(IPC.openReleasePage, url),
+  openFeedback: (kind) => ipcRenderer.send(IPC.openFeedback, kind),
+  onUpdateState: (handler) => {
+    const listener = (_e: Electron.IpcRendererEvent, st: UpdateState): void => handler(st)
+    ipcRenderer.on(IPC.updateState, listener)
+    return () => ipcRenderer.removeListener(IPC.updateState, listener)
+  },
   onOpenPath: (handler) => {
     const listener = (_e: Electron.IpcRendererEvent, path: string): void => handler(path)
     ipcRenderer.on(IPC.openPathEvent, listener)

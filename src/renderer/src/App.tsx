@@ -10,6 +10,8 @@ import { TopBar } from './ui/TopBar'
 import { StatusBar } from './ui/StatusBar'
 import { DropOverlay } from './ui/DropOverlay'
 import { MermaidWizard } from './ui/MermaidWizard'
+import { UpdateBanner } from './ui/UpdateBanner'
+import type { UpdateState } from '../../shared/update'
 import type { MenuCommand } from '../../shared/ipc'
 
 function dirOf(path: string | null): string | null {
@@ -37,6 +39,7 @@ export default function App(): React.JSX.Element {
   const [epoch, setEpoch] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [wizard, setWizard] = useState(false)
+  const [update, setUpdate] = useState<UpdateState>({ status: 'idle' })
   const busy = useRef(false)
   const editorRef = useRef<WysiwygHandle>(null)
 
@@ -67,6 +70,18 @@ export default function App(): React.JSX.Element {
   }, [doc.dirty])
 
   useEffect(() => window.lumen.onOpenPath((p) => void loadPath(p)), [loadPath])
+
+  // Actualizaciones: estado inicial (otra ventana pudo haberlo recibido antes) y cambios.
+  useEffect(() => {
+    void window.lumen.getUpdateState().then(setUpdate)
+    return window.lumen.onUpdateState(setUpdate)
+  }, [])
+  const saveBeforeRestart = useCallback(async (): Promise<boolean> => {
+    const s = store.get()
+    if (!s.dirty) return true
+    if (!s.path) return false
+    return store.save()
+  }, [store])
 
   const saveAs = useCallback(async () => {
     const res = await window.lumen.saveFileAs(
@@ -211,6 +226,7 @@ export default function App(): React.JSX.Element {
         onInsert={onInsert}
         onInsertTable={onInsertTable}
       />
+      <UpdateBanner state={update} saveBeforeRestart={saveBeforeRestart} />
       <main className="lumen-main">
         {doc.mode === 'wysiwyg' ? (
           <WysiwygEditor

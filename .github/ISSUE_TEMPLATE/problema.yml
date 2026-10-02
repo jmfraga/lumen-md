@@ -1,0 +1,44 @@
+name: 🐞 Reportar un problema
+description: Algo no funciona como esperabas.
+title: '[Problema] '
+labels: ['problema']
+body:
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: ¿Qué pasó?
+      description: Lo que viste. Si hay un mensaje de error, cópialo tal cual.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: ¿Qué esperabas que pasara?
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para que vuelva a pasar
+      placeholder: |
+        1. Abrí un archivo con una tabla
+        2. Cambié a Fuente con Cmd+/
+        3. …
+  - type: textarea
+    id: archivo
+    attributes:
+      label: Fragmento del Markdown (opcional)
+      description: Si Lumen alteró un documento al guardar, pega aquí el fragmento original. No compartas información privada.
+      render: markdown
+  - type: input
+    id: version
+    attributes:
+      label: Versión de Lumen
+      description: Se llena sola si abres esto desde Lumen (Ayuda → Reportar un problema).
+    validations:
+      required: true
+  - type: input
+    id: sistema
+    attributes:
+      label: Sistema
+      description: Mac, Windows o Linux, con versión si la sabes.

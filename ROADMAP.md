@@ -6,6 +6,11 @@
 - [x] Imágenes desde archivo y desde el portapapeles, copiadas a `assets/` junto al `.md`
 - [x] Asistente visual de diagramas Mermaid (flujo y secuencia) con vista previa
 
+## v0.3 (2026-10-02)
+
+- [x] Actualizaciones: aviso al abrir y cada 24 h, descarga y reinicio a petición del usuario
+- [x] Propuestas y reportes por GitHub Issues desde la app, con plantillas en español
+
 ## Después
 
 En orden aproximado de interés:
@@ -13,6 +18,5 @@ En orden aproximado de interés:
 - Árbol lateral para navegar una carpeta de `.md` y búsqueda entre archivos
 - Pestañas dentro de una ventana
 - Exportar a Word (`.docx`)
-- Auto-update desde GitHub Releases
 - Preferencias: tipografía, ancho de medida, tema forzado
 - Plugins de usuario
