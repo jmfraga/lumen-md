@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Principio:** Lumen es ligero y abre rápido. Cada función nueva debe ganarse su lugar: nada que corra al arrancar si puede esperar, y el presupuesto de tamaño (`npm run size`, también en CI) no se sube sin una razón escrita.
+
 ## v0.2 (completada 2026-09-17)
 
 - [x] Botón "Insertar" permanente con menú de bloques en español y selector de tabla

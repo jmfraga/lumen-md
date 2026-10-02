@@ -1,7 +1,7 @@
 name: 🐞 Reportar un problema
 description: Algo no funciona como esperabas.
 title: '[Problema] '
-labels: ['problema']
+labels: ['bug']
 body:
   - type: textarea
     id: que-paso

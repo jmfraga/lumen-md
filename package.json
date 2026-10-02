@@ -21,7 +21,8 @@
     "build:linux": "npm run typecheck && electron-vite build && electron-builder --linux",
     "test": "vitest run",
     "test:watch": "vitest",
-    "icons": "electron scripts/make-icons.mjs"
+    "icons": "electron scripts/make-icons.mjs",
+    "size": "node scripts/size-budget.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",

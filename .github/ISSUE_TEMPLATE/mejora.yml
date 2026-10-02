@@ -1,7 +1,7 @@
 name: 💡 Proponer una mejora
 description: Una idea para que Lumen sea más útil.
 title: '[Mejora] '
-labels: ['mejora']
+labels: ['enhancement']
 body:
   - type: markdown
     attributes:
