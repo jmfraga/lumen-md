@@ -11,11 +11,12 @@ import {
   isNewer,
   systemLabel,
   type FeedbackKind,
+  type UpdateErrorCode,
   releaseNotesUrl,
   type UpdateState
 } from '../shared/update'
 import { IPC } from '../shared/ipc'
-import { getPreferences } from './store'
+import { getLang, getPreferences } from './store'
 import { stateOf } from './windows'
 
 /**
@@ -50,7 +51,7 @@ export function canAutoUpdate(): boolean {
 
 function broadcast(next: UpdateState): void {
   state = next
-  log(next.status, 'version' in next ? next.version : '', 'message' in next ? next.message : '')
+  log(next.status, 'version' in next ? next.version : '', 'code' in next ? next.code : '')
   for (const w of BrowserWindow.getAllWindows()) {
     if (!w.isDestroyed()) w.webContents.send(IPC.updateState, state)
   }
@@ -66,7 +67,7 @@ async function checkViaGithubApi(manual: boolean): Promise<void> {
     const res = await net.fetch(LATEST_API, {
       headers: { Accept: 'application/vnd.github+json', 'User-Agent': `Lumen/${currentVersion()}` }
     })
-    if (!res.ok) throw new Error(`GitHub respondió ${res.status}`)
+    if (!res.ok) throw new Error(`GitHub responded ${res.status}`)
     const data = (await res.json()) as { tag_name?: string; html_url?: string }
     const latest = (data.tag_name ?? '').replace(/^v/, '')
     if (latest && isNewer(latest, currentVersion())) {
@@ -80,19 +81,19 @@ async function checkViaGithubApi(manual: boolean): Promise<void> {
       broadcast({ status: 'up-to-date', version: currentVersion(), manual })
     }
   } catch (err) {
-    broadcast({ status: 'error', message: friendlyError(err), manual })
+    broadcast({ status: 'error', code: errorCode(err), manual })
   }
 }
 
-function friendlyError(err: unknown): string {
+function errorCode(err: unknown): UpdateErrorCode {
   const msg = err instanceof Error ? err.message : String(err)
   if (/ENOTFOUND|ENETUNREACH|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|offline/i.test(msg)) {
-    return 'Sin conexión a internet. Se volverá a intentar más tarde.'
+    return 'offline'
   }
   if (/read-only|EROFS|not in \/Applications|ApplicationsFolder/i.test(msg)) {
-    return 'Mueve Lumen a la carpeta Aplicaciones para poder actualizarla.'
+    return 'applications'
   }
-  return 'No se pudo revisar o descargar la actualización.'
+  return 'generic'
 }
 
 export async function checkForUpdates(manual: boolean): Promise<void> {
@@ -107,7 +108,7 @@ export async function checkForUpdates(manual: boolean): Promise<void> {
   try {
     await autoUpdater.checkForUpdates()
   } catch (err) {
-    log('electron-updater falló, uso la API de GitHub', err)
+    log('electron-updater failed, falling back to the GitHub API', err)
     await checkViaGithubApi(manual)
   }
 }
@@ -122,7 +123,7 @@ export async function downloadUpdate(): Promise<void> {
   try {
     await autoUpdater.downloadUpdate()
   } catch (err) {
-    broadcast({ status: 'error', message: friendlyError(err), manual: true })
+    broadcast({ status: 'error', code: errorCode(err), manual: true })
   }
 }
 
@@ -145,7 +146,7 @@ export function openReleasePage(url?: string): void {
 export function openFeedback(kind: FeedbackKind): void {
   const k: FeedbackKind = kind === 'problema' ? 'problema' : 'mejora'
   void shell.openExternal(
-    feedbackUrl(k, app.getVersion(), systemLabel(process.platform, release()))
+    feedbackUrl(k, app.getVersion(), systemLabel(process.platform, release()), getLang())
   )
 }
 
@@ -180,7 +181,7 @@ export function initUpdater(): void {
       broadcast({ status: 'idle' })
       return
     }
-    broadcast({ status: 'error', message: friendlyError(err), manual: manualCheck })
+    broadcast({ status: 'error', code: errorCode(err), manual: manualCheck })
   })
 
   const auto = (): void => {

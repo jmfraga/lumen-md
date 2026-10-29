@@ -1,6 +1,8 @@
 import type { ViewMode } from '../state/document'
 import { InsertMenu } from './InsertMenu'
 import type { InsertKind } from '../editor/insert'
+import { useI18n } from '../i18n'
+import { shortcut } from '../../../shared/i18n'
 
 interface Props {
   name: string
@@ -16,6 +18,8 @@ interface Props {
 }
 
 export function TopBar(p: Props): React.JSX.Element {
+  const { t, platform } = useI18n()
+  const sc = (key: string): string => shortcut(platform, key)
   return (
     <header className="lumen-topbar">
       <div className="lumen-topbar-title" title={p.name}>
@@ -29,17 +33,29 @@ export function TopBar(p: Props): React.JSX.Element {
           onInsertTable={p.onInsertTable}
         />
         <span className="lumen-sep" />
-        <button type="button" onClick={p.onOpen} title="Abrir (⌘O)">
-          Abrir
+        <button
+          type="button"
+          onClick={p.onOpen}
+          title={t('topbar.openTitle', { shortcut: sc('O') })}
+        >
+          {t('topbar.open')}
         </button>
-        <button type="button" onClick={p.onSave} title="Guardar (⌘S)">
-          Guardar
+        <button
+          type="button"
+          onClick={p.onSave}
+          title={t('topbar.saveTitle', { shortcut: sc('S') })}
+        >
+          {t('topbar.save')}
         </button>
         <span className="lumen-sep" />
-        <button type="button" onClick={p.onExportHtml} title="Exportar a HTML">
+        <button type="button" onClick={p.onExportHtml} title={t('topbar.exportHtmlTitle')}>
           HTML
         </button>
-        <button type="button" onClick={p.onExportPdf} title="Exportar a PDF (⌘P)">
+        <button
+          type="button"
+          onClick={p.onExportPdf}
+          title={t('topbar.exportPdfTitle', { shortcut: sc('P') })}
+        >
           PDF
         </button>
         <span className="lumen-sep" />
@@ -47,9 +63,9 @@ export function TopBar(p: Props): React.JSX.Element {
           type="button"
           className={p.mode === 'source' ? 'active' : ''}
           onClick={p.onToggleSource}
-          title="Alternar fuente Markdown (⌘/)"
+          title={t('topbar.toggleTitle', { shortcut: sc('/') })}
         >
-          {p.mode === 'source' ? 'Vista' : 'Fuente'}
+          {p.mode === 'source' ? t('topbar.preview') : t('topbar.source')}
         </button>
       </div>
     </header>

@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
-import type { UpdateState } from '../../../shared/update'
+import type { UpdateErrorCode, UpdateState } from '../../../shared/update'
+import type { MessageKey } from '../../../shared/i18n'
+import { useI18n } from '../i18n'
 
 interface Props {
   state: UpdateState
   /** Guarda el documento actual si hace falta; devuelve false si no se pudo. */
   saveBeforeRestart: () => Promise<boolean>
+}
+
+const ERROR_KEYS: Record<UpdateErrorCode, MessageKey> = {
+  offline: 'update.errOffline',
+  applications: 'update.errApplications',
+  generic: 'update.errGeneric'
 }
 
 function keyOf(s: UpdateState): string {
@@ -13,50 +21,51 @@ function keyOf(s: UpdateState): string {
 
 /** Franja discreta arriba del documento. Nunca es modal ni roba el foco. */
 export function UpdateBanner({ state, saveBeforeRestart }: Props): React.JSX.Element | null {
+  const { t } = useI18n()
   const [dismissed, setDismissed] = useState<string | null>(null)
   // La nota se asocia a un estado concreto; al cambiar de estado deja de mostrarse sola.
-  const [noteFor, setNoteFor] = useState<{ key: string; text: string } | null>(null)
+  const [noteFor, setNoteFor] = useState<{ key: string; note: MessageKey } | null>(null)
 
-  // Mensajes de confirmación de una revisión manual se ocultan solos.
+  // La confirmación de una revisión manual se oculta sola.
   useEffect(() => {
     if (state.status !== 'up-to-date' || !state.manual) return
-    const t = setTimeout(() => setDismissed(keyOf(state)), 5000)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setDismissed(keyOf(state)), 5000)
+    return () => clearTimeout(timer)
   }, [state])
 
   if (dismissed === keyOf(state)) return null
   const close = (): void => setDismissed(keyOf(state))
-  const note = noteFor && noteFor.key === keyOf(state) ? noteFor.text : null
-  const setNote = (text: string): void => setNoteFor({ key: keyOf(state), text })
+  const note = noteFor && noteFor.key === keyOf(state) ? noteFor.note : null
+  const setNote = (n: MessageKey): void => setNoteFor({ key: keyOf(state), note: n })
 
   let body: React.JSX.Element | null = null
   switch (state.status) {
     case 'checking':
       if (!state.manual) return null
-      body = <span>Buscando actualizaciones…</span>
+      body = <span>{t('update.checking')}</span>
       break
     case 'up-to-date':
       if (!state.manual) return null
-      body = <span>Tienes la versión más reciente de Lumen ({state.version}).</span>
+      body = <span>{t('update.upToDate', { version: state.version })}</span>
       break
     case 'available':
       body = (
         <>
           <span>
-            <strong>Lumen {state.version}</strong> está disponible.
+            <strong>Lumen {state.version}</strong> {t('update.isAvailable')}
           </span>
           <button type="button" onClick={() => window.lumen.openReleasePage(state.notesUrl)}>
-            Ver novedades
+            {t('update.notes')}
           </button>
           <button
             type="button"
             className="primary"
             onClick={() => void window.lumen.downloadUpdate()}
           >
-            {state.canAutoUpdate ? 'Descargar' : 'Ir a descargas'}
+            {state.canAutoUpdate ? t('update.download') : t('update.goToDownloads')}
           </button>
           <button type="button" onClick={close}>
-            Más tarde
+            {t('update.later')}
           </button>
         </>
       )
@@ -64,9 +73,7 @@ export function UpdateBanner({ state, saveBeforeRestart }: Props): React.JSX.Ele
     case 'downloading':
       body = (
         <>
-          <span>
-            Descargando Lumen {state.version}… {state.percent}%
-          </span>
+          <span>{t('update.downloading', { version: state.version, percent: state.percent })}</span>
           <span className="lumen-update-progress" aria-hidden>
             <span style={{ width: `${state.percent}%` }} />
           </span>
@@ -77,28 +84,27 @@ export function UpdateBanner({ state, saveBeforeRestart }: Props): React.JSX.Ele
       body = (
         <>
           <span>
-            <strong>Lumen {state.version}</strong> está lista para instalarse.
+            <strong>Lumen {state.version}</strong> {t('update.isReady')}
           </span>
-          {note && <span className="lumen-update-note">{note}</span>}
+          {note && <span className="lumen-update-note">{t(note)}</span>}
           <button
             type="button"
             className="primary"
             onClick={() =>
               void (async () => {
                 if (!(await saveBeforeRestart())) {
-                  setNote('Guarda el documento antes de reiniciar.')
+                  setNote('update.saveFirst')
                   return
                 }
                 const res = await window.lumen.installUpdate()
-                if (!res.ok && res.reason === 'dirty')
-                  setNote('Hay otra ventana con cambios sin guardar.')
+                if (!res.ok && res.reason === 'dirty') setNote('update.otherDirty')
               })()
             }
           >
-            Reiniciar ahora
+            {t('update.restart')}
           </button>
-          <button type="button" onClick={close} title="Se instalará cuando cierres Lumen">
-            Al cerrar Lumen
+          <button type="button" onClick={close} title={t('update.onQuitTitle')}>
+            {t('update.onQuit')}
           </button>
         </>
       )
@@ -107,12 +113,12 @@ export function UpdateBanner({ state, saveBeforeRestart }: Props): React.JSX.Ele
       if (!state.manual) return null
       body = (
         <>
-          <span>{state.message}</span>
+          <span>{t(ERROR_KEYS[state.code])}</span>
           <button type="button" onClick={() => window.lumen.openReleasePage()}>
-            Abrir página de descargas
+            {t('update.openDownloads')}
           </button>
           <button type="button" onClick={close}>
-            Cerrar
+            {t('update.close')}
           </button>
         </>
       )

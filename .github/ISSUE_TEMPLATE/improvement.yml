@@ -1,0 +1,41 @@
+name: 💡 Suggest an improvement (English)
+description: An idea to make Lumen more useful.
+title: '[Improvement] '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Describe it the way you'd tell a friend: no programming knowledge needed.
+  - type: textarea
+    id: situacion
+    attributes:
+      label: What were you trying to do?
+      description: The real situation. For example, "review a report from ChatGPT with lots of tables".
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: What would you like Lumen to do?
+      description: Your suggestion. If you have a screenshot or an example, drag it here.
+    validations:
+      required: true
+  - type: dropdown
+    id: importancia
+    attributes:
+      label: How much would it change your day?
+      options:
+        - It would be a nice touch
+        - I'd use it often
+        - Today it stops me from using Lumen for something
+  - type: input
+    id: version
+    attributes:
+      label: Lumen version
+      description: Filled in automatically if you open this from Lumen (Help → Suggest an Improvement).
+  - type: input
+    id: sistema
+    attributes:
+      label: System
+      description: Mac, Windows, or Linux.

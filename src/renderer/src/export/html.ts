@@ -21,6 +21,8 @@ import type { Root as HastRoot, Element } from 'hast'
 
 export interface RenderOptions {
   title?: string
+  /** Atributo lang del HTML exportado (idioma de la interfaz). */
+  lang?: 'es' | 'en'
   css: string
   katexCss?: string
   /** Renderiza un bloque mermaid a SVG; null si falla. */
@@ -138,9 +140,10 @@ export async function hydrateInBrowser(bodyHtml: string, opts: RenderOptions): P
 }
 
 export function wrapDocument(bodyHtml: string, opts: RenderOptions): string {
-  const title = escapeHtml(opts.title ?? 'Documento')
+  const lang = opts.lang ?? 'es'
+  const title = escapeHtml(opts.title ?? (lang === 'en' ? 'Document' : 'Documento'))
   return `<!doctype html>
-<html lang="es">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

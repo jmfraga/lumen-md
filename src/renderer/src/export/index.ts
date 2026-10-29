@@ -8,7 +8,8 @@ import { resolveAssetUrl, toDataUrl, isRemote } from './assets'
 export async function buildExportHtml(
   markdown: string,
   title: string,
-  baseDir: string | null
+  baseDir: string | null,
+  lang: 'es' | 'en' = 'es'
 ): Promise<string> {
   const body = await markdownToBodyHtml(markdown, { showFrontmatter: true })
   const hydrated = await hydrateInBrowser(body, {
@@ -20,5 +21,5 @@ export async function buildExportHtml(
       return toDataUrl(url)
     }
   })
-  return wrapDocument(hydrated, { title, css: printCss, katexCss })
+  return wrapDocument(hydrated, { title, css: printCss, katexCss, lang })
 }

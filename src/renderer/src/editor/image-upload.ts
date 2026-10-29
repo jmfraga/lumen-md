@@ -11,9 +11,7 @@ import { imageBlockSchema } from '@milkdown/kit/component/image-block'
 
 export class DocumentNotSavedError extends Error {
   constructor() {
-    super(
-      'Guarda el documento antes de agregar imágenes: se copian a una carpeta assets/ junto al archivo.'
-    )
+    super('msg.imageNeedsSave')
     this.name = 'DocumentNotSavedError'
   }
 }
@@ -23,7 +21,7 @@ export async function saveImageAsset(file: File, docPath: string | null): Promis
   const data = await file.arrayBuffer()
   const name = file.name && file.name !== 'image.png' ? file.name : null
   const res = await window.lumen.saveAsset(docPath, name, file.type || 'image/png', data)
-  if (!res.ok || !res.relPath) throw new Error(res.error ?? 'No se pudo guardar la imagen')
+  if (!res.ok || !res.relPath) throw new Error(res.error ?? 'msg.imageError')
   return res.relPath
 }
 

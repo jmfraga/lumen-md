@@ -8,6 +8,9 @@ export function releaseNotesUrl(version: string): string {
   return `${RELEASES_URL}/tag/v${version}`
 }
 
+/** Se traduce en el renderer, así el mensaje sigue el idioma aunque cambie después. */
+export type UpdateErrorCode = 'offline' | 'applications' | 'generic'
+
 export type UpdateState =
   | { status: 'idle' }
   | { status: 'checking'; manual: boolean }
@@ -16,7 +19,7 @@ export type UpdateState =
   | { status: 'available'; version: string; notesUrl: string; canAutoUpdate: boolean }
   | { status: 'downloading'; version: string; percent: number }
   | { status: 'ready'; version: string }
-  | { status: 'error'; message: string; manual: boolean }
+  | { status: 'error'; code: UpdateErrorCode; manual: boolean }
 
 /** Semver mínimo: MAYOR.MENOR.PARCHE con prefijo `v` opcional; prerelease < release. */
 export function parseVersion(v: string): { parts: [number, number, number]; pre: string } | null {
@@ -59,9 +62,19 @@ const ISSUES_NEW = 'https://github.com/jmfraga/lumen-md/issues/new'
  * Enlace a un issue nuevo con la plantilla y los campos de versión y sistema
  * ya llenos (GitHub rellena campos de issue forms por su `id` en la URL).
  */
-export function feedbackUrl(kind: FeedbackKind, version: string, system: string): string {
+const TEMPLATES: Record<'es' | 'en', Record<FeedbackKind, string>> = {
+  es: { mejora: 'mejora.yml', problema: 'problema.yml' },
+  en: { mejora: 'improvement.yml', problema: 'bug-report.yml' }
+}
+
+export function feedbackUrl(
+  kind: FeedbackKind,
+  version: string,
+  system: string,
+  lang: 'es' | 'en' = 'es'
+): string {
   const params = new URLSearchParams({
-    template: `${kind}.yml`,
+    template: TEMPLATES[lang][kind],
     version,
     sistema: system
   })

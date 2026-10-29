@@ -1,0 +1,44 @@
+name: 🐞 Report a problem (English)
+description: Something doesn't work the way you expected.
+title: '[Bug] '
+labels: ['bug']
+body:
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: What happened?
+      description: What you saw. If there's an error message, copy it exactly.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Opened a file with a table
+        2. Switched to Source with Cmd+/
+        3. …
+  - type: textarea
+    id: archivo
+    attributes:
+      label: Markdown snippet (optional)
+      description: If Lumen changed a document when saving, paste the original snippet here. Don't share private information.
+      render: markdown
+  - type: input
+    id: version
+    attributes:
+      label: Lumen version
+      description: Filled in automatically if you open this from Lumen (Help → Report a Problem).
+    validations:
+      required: true
+  - type: input
+    id: sistema
+    attributes:
+      label: System
+      description: Mac, Windows, or Linux, with version if you know it.

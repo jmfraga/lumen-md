@@ -1,10 +1,12 @@
 import type { ViewMode } from '../state/document'
+import type { Message } from '../../../shared/i18n'
+import { useI18n } from '../i18n'
 
 interface Props {
   path: string | null
   autosave: boolean
   dirty: boolean
-  status: string
+  status: Message | null
   mode: ViewMode
   text: string
 }
@@ -15,25 +17,27 @@ function countWords(text: string): number {
 }
 
 export function StatusBar(p: Props): React.JSX.Element {
+  const { t } = useI18n()
+  const n = countWords(p.text)
   return (
     <footer className="lumen-statusbar">
       <span className="lumen-status-path" title={p.path ?? ''}>
-        {p.path ?? 'Documento nuevo (sin guardar)'}
+        {p.path ?? t('status.newDoc')}
       </span>
       <span className="lumen-status-right">
-        {p.status && <span className="lumen-status-msg">{p.status}</span>}
-        <span>{countWords(p.text)} palabras</span>
-        <span>{p.mode === 'source' ? 'Fuente' : 'WYSIWYG'}</span>
+        {p.status && <span className="lumen-status-msg">{t(p.status.key, p.status.vars)}</span>}
+        <span>{t(n === 1 ? 'status.word' : 'status.words', { n })}</span>
+        <span>{p.mode === 'source' ? t('status.modeSource') : t('status.modeWysiwyg')}</span>
         <button
           type="button"
           className="lumen-status-feedback"
           onClick={() => window.lumen.openFeedback('mejora')}
-          title="Abre GitHub para proponer una mejora (necesitas una cuenta gratuita)"
+          title={t('status.suggestTitle')}
         >
-          💡 Sugerir mejora
+          {t('status.suggest')}
         </button>
-        <span title="Autoguardado">
-          {p.autosave ? 'Auto ✓' : p.dirty ? 'Sin guardar' : 'Manual'}
+        <span title={t('status.autosaveTitle')}>
+          {p.autosave ? t('status.autosaveOn') : p.dirty ? t('status.unsaved') : t('status.manual')}
         </span>
       </span>
     </footer>

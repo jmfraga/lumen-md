@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import { Crepe } from '@milkdown/crepe'
 import { frontmatter } from '../src/renderer/src/editor/frontmatter'
 import { configureSerialization } from '../src/renderer/src/editor/serialization'
-import { insert, insertTable, MERMAID_TEMPLATE } from '../src/renderer/src/editor/insert'
+import { insert, insertTable, mermaidTemplate } from '../src/renderer/src/editor/insert'
 import type { InsertKind } from '../src/renderer/src/editor/insert'
 
 async function withEditor(fn: (crepe: Crepe) => void): Promise<string> {
@@ -80,9 +80,16 @@ describe('inserciones desde el menú', () => {
     expect(rows[0].split('|').length - 2).toBe(3)
   })
 
-  it('mermaid inserta un bloque con plantilla', async () => {
-    const md = await withEditor((c) => c.editor.action((ctx) => insert(ctx, 'mermaid')))
-    expect(md).toContain('```mermaid')
-    expect(md).toContain(MERMAID_TEMPLATE.split('\n')[0])
+  for (const lang of ['es', 'en'] as const) {
+    it(`mermaid inserta un bloque con plantilla (${lang})`, async () => {
+      const md = await withEditor((c) => c.editor.action((ctx) => insert(ctx, 'mermaid', lang)))
+      expect(md).toContain('```mermaid')
+      expect(md).toContain(mermaidTemplate(lang).split('\n')[1].trim())
+    })
+  }
+  it('la plantilla cambia de idioma', () => {
+    expect(mermaidTemplate('es')).toContain('Inicio')
+    expect(mermaidTemplate('en')).toContain('Start')
+    expect(mermaidTemplate('en')).not.toMatch(/[áéíóúñ¿]/)
   })
 })

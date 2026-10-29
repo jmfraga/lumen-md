@@ -36,6 +36,13 @@ describe('propuestas por GitHub Issues', () => {
     expect(url.searchParams.get('version')).toBe('0.3.0')
     expect(url.searchParams.get('sistema')).toBe('Mac (25.5.0)')
   })
+  it('en inglés abre las plantillas en inglés', () => {
+    const imp = new URL(feedbackUrl('mejora', '0.4.0', 'Windows (10.0)', 'en'))
+    const bug = new URL(feedbackUrl('problema', '0.4.0', 'Windows (10.0)', 'en'))
+    expect(imp.searchParams.get('template')).toBe('improvement.yml')
+    expect(bug.searchParams.get('template')).toBe('bug-report.yml')
+    expect(bug.searchParams.get('version')).toBe('0.4.0')
+  })
   it('nombres de sistema legibles', () => {
     expect(systemLabel('win32', '10.0.22631')).toBe('Windows (10.0.22631)')
     expect(systemLabel('darwin', '25.5.0')).toBe('Mac (25.5.0)')

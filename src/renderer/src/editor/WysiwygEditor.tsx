@@ -4,8 +4,14 @@ import { Crepe } from '@milkdown/crepe'
 import { editorViewCtx } from '@milkdown/kit/core'
 import { frontmatter } from './frontmatter'
 import { configureSerialization, postProcessMarkdown } from './serialization'
-import { insertCodeBlockWithContent, MERMAID_TEMPLATE } from './insert'
-import { saveImageAsset, imageFilesFromClipboard, insertImageBlock } from './image-upload'
+import { insertCodeBlockWithContent, mermaidTemplate } from './insert'
+import {
+  saveImageAsset,
+  imageFilesFromClipboard,
+  insertImageBlock,
+  DocumentNotSavedError
+} from './image-upload'
+import { translator, type Lang, type Message } from '../../../shared/i18n'
 import { renderMermaid } from './mermaid'
 import { resolveAssetUrl } from '../export/assets'
 
@@ -22,7 +28,9 @@ interface Props {
   docPath: string | null
   onChange: (markdown: string) => void
   /** Mensajes para la barra de estado (errores de imagen, etc.). */
-  onStatus?: (msg: string) => void
+  onStatus?: (msg: Message) => void
+  /** Idioma de los textos del editor. Cambiarlo remonta el editor (la key del componente lo fuerza). */
+  lang: Lang
 }
 
 export interface WysiwygHandle {
@@ -32,7 +40,7 @@ export interface WysiwygHandle {
 
 /** Milkdown Crepe. Se monta una vez por documento; el texto vive en DocumentStore. */
 export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEditor(
-  { initialText, baseDir, docPath, onChange, onStatus },
+  { initialText, baseDir, docPath, onChange, onStatus, lang },
   ref
 ): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -58,6 +66,7 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
     const root = rootRef.current
     if (!root) return
     let destroyed = false
+    const t = translator(lang)
     // Los plugins de Milkdown disparan transacciones internas al montar
     // (párrafo final, normalización). Nada de eso es una edición: solo
     // aceptamos cambios después de la primera interacción real del usuario.
@@ -73,10 +82,12 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
     const upload = async (file: File): Promise<string> => {
       try {
         const rel = await saveImageAsset(file, docPathRef.current)
-        onStatusRef.current?.(`Imagen guardada en ${rel}`)
+        onStatusRef.current?.({ key: 'msg.imageSaved', vars: { path: rel } })
         return rel
       } catch (err) {
-        onStatusRef.current?.(err instanceof Error ? err.message : String(err))
+        onStatusRef.current?.({
+          key: err instanceof DocumentNotSavedError ? 'msg.imageNeedsSave' : 'msg.imageError'
+        })
         throw err
       }
     }
@@ -107,53 +118,53 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
       },
       featureConfigs: {
         [Crepe.Feature.Toolbar]: {
-          boldLabel: 'Negritas',
-          italicLabel: 'Cursivas',
-          strikethroughLabel: 'Tachado',
-          codeLabel: 'Código en línea',
-          latexLabel: 'Fórmula LaTeX',
-          linkLabel: 'Enlace'
+          boldLabel: t('editor.bold'),
+          italicLabel: t('editor.italic'),
+          strikethroughLabel: t('editor.strikethrough'),
+          codeLabel: t('editor.inlineCode'),
+          latexLabel: t('editor.latex'),
+          linkLabel: t('editor.link')
         },
         [Crepe.Feature.BlockEdit]: {
           textGroup: {
-            label: 'Texto',
-            text: { label: 'Texto normal' },
-            h1: { label: 'Título 1' },
-            h2: { label: 'Título 2' },
-            h3: { label: 'Título 3' },
-            h4: { label: 'Título 4' },
-            h5: { label: 'Título 5' },
-            h6: { label: 'Título 6' },
-            quote: { label: 'Cita' },
-            divider: { label: 'Separador' }
+            label: t('slash.text'),
+            text: { label: t('insert.paragraph') },
+            h1: { label: t('insert.h1') },
+            h2: { label: t('insert.h2') },
+            h3: { label: t('insert.h3') },
+            h4: { label: t('insert.h4') },
+            h5: { label: t('insert.h5') },
+            h6: { label: t('insert.h6') },
+            quote: { label: t('insert.quote') },
+            divider: { label: t('insert.divider') }
           },
           listGroup: {
-            label: 'Listas',
-            bulletList: { label: 'Lista con viñetas' },
-            orderedList: { label: 'Lista numerada' },
-            taskList: { label: 'Lista de tareas' }
+            label: t('slash.lists'),
+            bulletList: { label: t('insert.bulletList') },
+            orderedList: { label: t('insert.orderedList') },
+            taskList: { label: t('insert.taskList') }
           },
           advancedGroup: {
-            label: 'Bloques',
-            image: { label: 'Imagen' },
-            codeBlock: { label: 'Bloque de código' },
-            table: { label: 'Tabla' },
-            math: { label: 'Fórmula LaTeX' }
+            label: t('slash.blocks'),
+            image: { label: t('insert.image') },
+            codeBlock: { label: t('insert.code') },
+            table: { label: t('insert.table') },
+            math: { label: t('insert.math') }
           },
           buildMenu: (builder) => {
             builder.getGroup('advanced').addItem('mermaid', {
-              label: 'Diagrama Mermaid',
+              label: t('insert.mermaid'),
               icon: MERMAID_ICON,
-              onRun: (ctx) => insertCodeBlockWithContent(ctx, 'mermaid', MERMAID_TEMPLATE)
+              onRun: (ctx) => insertCodeBlockWithContent(ctx, 'mermaid', mermaidTemplate(lang))
             })
           }
         },
-        [Crepe.Feature.Placeholder]: { text: 'Escribe aquí…', mode: 'doc' },
+        [Crepe.Feature.Placeholder]: { text: t('editor.placeholder'), mode: 'doc' },
         [Crepe.Feature.CodeMirror]: {
           renderPreview: (language, content, applyPreview) => {
             if (language.toLowerCase() !== 'mermaid' || !content.trim()) return null
             void renderMermaid(content).then((svg) => {
-              if (!svg) return applyPreview('Diagrama Mermaid inválido')
+              if (!svg) return applyPreview(t('editor.mermaidInvalid'))
               const holder = document.createElement('div')
               holder.className = 'lumen-mermaid-preview'
               holder.innerHTML = svg
@@ -161,7 +172,7 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
             })
             return undefined
           },
-          previewLabel: 'Vista previa',
+          previewLabel: t('editor.preview'),
           previewOnlyByDefault: true
         },
         [Crepe.Feature.ImageBlock]: {
@@ -169,13 +180,13 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
           onUpload: upload,
           blockOnUpload: upload,
           inlineOnUpload: upload,
-          blockUploadButton: 'Elegir archivo…',
-          blockUploadPlaceholderText: 'Pega un enlace o elige una imagen',
-          blockCaptionPlaceholderText: 'Pie de imagen',
-          blockConfirmButton: 'Aceptar',
-          inlineUploadButton: 'Elegir archivo…',
-          inlineUploadPlaceholderText: 'Pega un enlace o elige una imagen',
-          inlineConfirmButton: 'Aceptar'
+          blockUploadButton: t('editor.chooseFile'),
+          blockUploadPlaceholderText: t('editor.imagePlaceholder'),
+          blockCaptionPlaceholderText: t('editor.caption'),
+          blockConfirmButton: t('editor.confirm'),
+          inlineUploadButton: t('editor.chooseFile'),
+          inlineUploadPlaceholderText: t('editor.imagePlaceholder'),
+          inlineConfirmButton: t('editor.confirm')
         }
       }
     })

@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { IPC } from '../shared/ipc'
 import type { LumenApi, MenuCommand, Preferences } from '../shared/ipc'
 import type { UpdateState } from '../shared/update'
+import type { Lang } from '../shared/i18n'
 
 const lumen: LumenApi = {
   getInitialFile: () => ipcRenderer.invoke(IPC.getInitialFile),
@@ -36,6 +37,12 @@ const lumen: LumenApi = {
     ipcRenderer.on(IPC.updateState, listener)
     return () => ipcRenderer.removeListener(IPC.updateState, listener)
   },
+  onLanguage: (handler) => {
+    const listener = (_e: Electron.IpcRendererEvent, lang: Lang): void => handler(lang)
+    ipcRenderer.on(IPC.language, listener)
+    return () => ipcRenderer.removeListener(IPC.language, listener)
+  },
+  platform: process.platform,
   onOpenPath: (handler) => {
     const listener = (_e: Electron.IpcRendererEvent, path: string): void => handler(path)
     ipcRenderer.on(IPC.openPathEvent, listener)

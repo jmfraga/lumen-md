@@ -1,3 +1,5 @@
+import { translator, type Lang } from '../../../shared/i18n'
+
 /**
  * Generador de código Mermaid a partir de formularios. Puro: sin DOM, probable en Node.
  * Cubre los dos tipos que más producen las herramientas de IA: flujo y secuencia.
@@ -133,30 +135,32 @@ export function buildDiagram(spec: DiagramSpec): string {
   return spec.kind === 'flowchart' ? buildFlowchart(spec.flow) : buildSequence(spec.seq)
 }
 
-export function defaultFlowchart(): FlowchartSpec {
+export function defaultFlowchart(lang: Lang = 'es'): FlowchartSpec {
+  const t = translator(lang)
   return {
     direction: 'LR',
     nodes: [
-      { id: 'A', label: 'Inicio', shape: 'round' },
-      { id: 'B', label: '¿Decisión?', shape: 'diamond' },
-      { id: 'C', label: 'Resultado', shape: 'rect' }
+      { id: 'A', label: t('tpl.start'), shape: 'round' },
+      { id: 'B', label: t('tpl.decision'), shape: 'diamond' },
+      { id: 'C', label: t('tpl.result'), shape: 'rect' }
     ],
     edges: [
       { from: 'A', to: 'B', label: '', style: 'arrow' },
-      { from: 'B', to: 'C', label: 'Sí', style: 'arrow' }
+      { from: 'B', to: 'C', label: t('tpl.yes'), style: 'arrow' }
     ]
   }
 }
 
-export function defaultSequence(): SequenceSpec {
+export function defaultSequence(lang: Lang = 'es'): SequenceSpec {
+  const t = translator(lang)
   return {
     participants: [
-      { id: 'A', label: 'Paciente' },
-      { id: 'B', label: 'Médico' }
+      { id: 'A', label: t('tpl.patient') },
+      { id: 'B', label: t('tpl.doctor') }
     ],
     messages: [
-      { from: 'A', to: 'B', text: 'Consulta', style: 'sync' },
-      { from: 'B', to: 'A', text: 'Indicaciones', style: 'reply' }
+      { from: 'A', to: 'B', text: t('tpl.consult'), style: 'sync' },
+      { from: 'B', to: 'A', text: t('tpl.instructions'), style: 'reply' }
     ]
   }
 }

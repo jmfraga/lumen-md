@@ -1,6 +1,7 @@
 /** Contrato IPC entre main y renderer. Único punto de acuerdo entre ambos lados. */
 
 import type { UpdateState, FeedbackKind } from './update'
+import type { Lang } from './i18n'
 
 export interface OpenedFile {
   path: string
@@ -30,6 +31,8 @@ export interface Preferences {
   autosave: boolean
   /** Revisar actualizaciones al abrir y una vez al día. */
   checkUpdates: boolean
+  /** Idioma de la interfaz (resuelto: elegido por el usuario o detectado del sistema). */
+  language: Lang
 }
 
 /** API expuesta al renderer vía contextBridge como `window.lumen`. */
@@ -71,6 +74,10 @@ export interface LumenApi {
   /** Abre GitHub con la plantilla de mejora o problema, con versión y sistema ya llenos. */
   openFeedback(kind: FeedbackKind): void
   onUpdateState(handler: (state: UpdateState) => void): () => void
+  /** El usuario cambió el idioma desde el menú. */
+  onLanguage(handler: (lang: Lang) => void): () => void
+  /** Plataforma, para mostrar atajos con ⌘ o Ctrl. */
+  platform: string
   /** Main pide a una ventana vacía que cargue esta ruta. */
   onOpenPath(handler: (path: string) => void): () => void
 }
@@ -100,6 +107,7 @@ export const IPC = {
   setCurrentPath: 'lumen:set-current-path',
   command: 'lumen:command',
   updateState: 'lumen:update-state',
+  language: 'lumen:language',
   getUpdateState: 'lumen:get-update-state',
   checkForUpdates: 'lumen:check-updates',
   downloadUpdate: 'lumen:download-update',

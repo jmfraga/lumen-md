@@ -3,6 +3,8 @@ import { writeFile } from 'fs/promises'
 import { join, basename } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { t } from '../shared/i18n'
+import { getLang } from './store'
 
 /**
  * Una ventana por documento. Aquí vive el estado que main necesita conocer
@@ -33,12 +35,17 @@ export function findWindowForPath(path: string): BrowserWindow | undefined {
 
 function updateTitle(win: BrowserWindow): void {
   const s = stateOf(win)
-  const name = s.filePath ? basename(s.filePath) : 'Sin título'
+  const name = s.filePath ? basename(s.filePath) : t(getLang(), 'app.untitled')
   win.setTitle(`${s.dirty ? '• ' : ''}${name} — Lumen`)
   if (process.platform === 'darwin') {
     win.setRepresentedFilename(s.filePath ?? '')
     win.setDocumentEdited(s.dirty)
   }
+}
+
+/** Tras cambiar de idioma: "Sin título" ↔ "Untitled". */
+export function refreshTitles(): void {
+  for (const w of BrowserWindow.getAllWindows()) if (!w.isDestroyed()) updateTitle(w)
 }
 
 export function setWindowPath(win: BrowserWindow, path: string | null): void {
@@ -104,9 +111,9 @@ export function createWindow(filePath: string | null = null): BrowserWindow {
             }
             const image = await win.webContents.capturePage()
             await writeFile(shotPath, image.toPNG())
-            console.log(`[lumen] captura guardada en ${shotPath}`)
+            console.log(`[lumen] screenshot saved to ${shotPath}`)
           } catch (err) {
-            console.error('[lumen] captura falló', err)
+            console.error('[lumen] screenshot failed', err)
           } finally {
             app.exit(0)
           }
@@ -128,13 +135,14 @@ export function createWindow(filePath: string | null = null): BrowserWindow {
 
   win.on('close', (e) => {
     if (!stateOf(win).dirty) return
+    const lang = getLang()
     const choice = dialog.showMessageBoxSync(win, {
       type: 'warning',
-      buttons: ['Guardar', 'Descartar', 'Cancelar'],
+      buttons: [t(lang, 'dialog.save'), t(lang, 'dialog.discard'), t(lang, 'dialog.cancel')],
       defaultId: 0,
       cancelId: 2,
-      message: '¿Guardar los cambios antes de cerrar?',
-      detail: 'Si descartas, los cambios sin guardar se perderán.'
+      message: t(lang, 'dialog.unsavedTitle'),
+      detail: t(lang, 'dialog.unsavedDetail')
     })
     if (choice === 2) {
       e.preventDefault()

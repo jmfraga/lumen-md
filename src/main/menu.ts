@@ -1,20 +1,36 @@
 import { app, BrowserWindow, Menu, shell } from 'electron'
 import type { MenuItemConstructorOptions } from 'electron'
 import { basename } from 'path'
-import { createWindow } from './windows'
+import { createWindow, refreshTitles } from './windows'
 import { openPathInWindow, openFileDialog } from './ipc'
 import { clearRecents, getPreferences, getRecents, setPreferences } from './store'
 import { checkForUpdates, openFeedback } from './updater'
+import { IPC } from '../shared/ipc'
+import { LANGS, LANG_NAMES, translator, type Lang } from '../shared/i18n'
 
 const isMac = process.platform === 'darwin'
+const REPO = 'https://github.com/jmfraga/lumen-md'
+/** Bilingüe a propósito: quien no entiende el idioma activo igual lo encuentra. */
+const LANGUAGE_MENU_LABEL = 'Idioma · Language'
 
 function send(command: string): void {
-  BrowserWindow.getFocusedWindow()?.webContents.send('lumen:command', command)
+  BrowserWindow.getFocusedWindow()?.webContents.send(IPC.command, command)
+}
+
+/** Cambia el idioma de toda la app al instante: menú, títulos de ventana y cada ventana abierta. */
+export function setLanguage(lang: Lang): void {
+  setPreferences({ language: lang })
+  rebuildMenu()
+  refreshTitles()
+  for (const w of BrowserWindow.getAllWindows()) {
+    if (!w.isDestroyed()) w.webContents.send(IPC.language, lang)
+  }
 }
 
 export function buildMenu(): Menu {
   const recents = getRecents()
   const prefs = getPreferences()
+  const t = translator(prefs.language)
 
   const recentItems: MenuItemConstructorOptions[] = recents.length
     ? [
@@ -25,14 +41,21 @@ export function buildMenu(): Menu {
         })),
         { type: 'separator' as const },
         {
-          label: 'Limpiar recientes',
+          label: t('menu.clearRecents'),
           click: () => {
             clearRecents()
             rebuildMenu()
           }
         }
       ]
-    : [{ label: 'Sin archivos recientes', enabled: false }]
+    : [{ label: t('menu.noRecents'), enabled: false }]
+
+  const languageItems: MenuItemConstructorOptions[] = LANGS.map((lang) => ({
+    label: LANG_NAMES[lang],
+    type: 'radio' as const,
+    checked: prefs.language === lang,
+    click: () => setLanguage(lang)
+  }))
 
   const template: MenuItemConstructorOptions[] = [
     ...(isMac
@@ -40,102 +63,117 @@ export function buildMenu(): Menu {
           {
             label: app.name,
             submenu: [
-              { role: 'about' as const },
-              { label: 'Buscar actualizaciones…', click: () => void checkForUpdates(true) },
+              { role: 'about' as const, label: t('menu.about') },
+              { label: t('menu.checkUpdates'), click: () => void checkForUpdates(true) },
               { type: 'separator' as const },
-              { role: 'services' as const },
+              { role: 'services' as const, label: t('menu.services') },
               { type: 'separator' as const },
-              { role: 'hide' as const },
-              { role: 'hideOthers' as const },
-              { role: 'unhide' as const },
+              { role: 'hide' as const, label: t('menu.hide') },
+              { role: 'hideOthers' as const, label: t('menu.hideOthers') },
+              { role: 'unhide' as const, label: t('menu.unhide') },
               { type: 'separator' as const },
-              { role: 'quit' as const }
+              { role: 'quit' as const, label: t('menu.quitApp') }
             ]
           }
         ]
       : []),
     {
-      label: 'Archivo',
+      label: t('menu.file'),
       submenu: [
-        { label: 'Nuevo', accelerator: 'CmdOrCtrl+N', click: () => createWindow(null) },
+        { label: t('menu.new'), accelerator: 'CmdOrCtrl+N', click: () => createWindow(null) },
         {
-          label: 'Abrir…',
+          label: t('menu.open'),
           accelerator: 'CmdOrCtrl+O',
           click: () => openFileDialog(BrowserWindow.getFocusedWindow() ?? undefined)
         },
-        { label: 'Abrir reciente', submenu: recentItems },
+        { label: t('menu.openRecent'), submenu: recentItems },
         { type: 'separator' },
-        { label: 'Guardar', accelerator: 'CmdOrCtrl+S', click: () => send('save') },
-        { label: 'Guardar como…', accelerator: 'Shift+CmdOrCtrl+S', click: () => send('save-as') },
+        { label: t('menu.save'), accelerator: 'CmdOrCtrl+S', click: () => send('save') },
+        {
+          label: t('menu.saveAs'),
+          accelerator: 'Shift+CmdOrCtrl+S',
+          click: () => send('save-as')
+        },
         { type: 'separator' },
-        { label: 'Exportar a HTML…', click: () => send('export-html') },
-        { label: 'Exportar a PDF…', accelerator: 'CmdOrCtrl+P', click: () => send('export-pdf') },
+        { label: t('menu.exportHtml'), click: () => send('export-html') },
+        {
+          label: t('menu.exportPdf'),
+          accelerator: 'CmdOrCtrl+P',
+          click: () => send('export-pdf')
+        },
         { type: 'separator' },
         {
-          label: 'Autoguardado',
+          label: t('menu.autosave'),
           type: 'checkbox',
           checked: prefs.autosave,
           click: () => send('toggle-autosave')
         },
         { type: 'separator' },
-        isMac ? { role: 'close' } : { role: 'quit' }
+        isMac
+          ? { role: 'close', label: t('menu.closeWindow') }
+          : { role: 'quit', label: t('menu.quit') }
       ]
     },
     {
-      label: 'Edición',
+      label: t('menu.edit'),
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
+        { role: 'undo', label: t('menu.undo') },
+        { role: 'redo', label: t('menu.redo') },
         { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'pasteAndMatchStyle' },
-        { role: 'selectAll' }
+        { role: 'cut', label: t('menu.cut') },
+        { role: 'copy', label: t('menu.copy') },
+        { role: 'paste', label: t('menu.paste') },
+        { role: 'pasteAndMatchStyle', label: t('menu.pasteAndMatchStyle') },
+        { role: 'selectAll', label: t('menu.selectAll') }
       ]
     },
     {
-      label: 'Ver',
+      label: t('menu.view'),
       submenu: [
         {
-          label: 'Alternar fuente Markdown',
+          label: t('menu.toggleSource'),
           accelerator: 'CmdOrCtrl+/',
           click: () => send('toggle-source')
         },
         { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
+        { label: LANGUAGE_MENU_LABEL, submenu: languageItems },
         { type: 'separator' },
-        { role: 'togglefullscreen' },
+        { role: 'resetZoom', label: t('menu.resetZoom') },
+        { role: 'zoomIn', label: t('menu.zoomIn') },
+        { role: 'zoomOut', label: t('menu.zoomOut') },
+        { type: 'separator' },
+        { role: 'togglefullscreen', label: t('menu.fullscreen') },
         ...(app.isPackaged
           ? []
-          : [{ type: 'separator' as const }, { role: 'toggleDevTools' as const }])
+          : [
+              { type: 'separator' as const },
+              { role: 'toggleDevTools' as const, label: t('menu.devtools') }
+            ])
       ]
     },
     {
-      label: 'Ventana',
+      label: t('menu.window'),
       submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        ...(isMac ? [{ type: 'separator' as const }, { role: 'front' as const }] : [])
+        { role: 'minimize', label: t('menu.minimize') },
+        { role: 'zoom', label: t('menu.zoom') },
+        ...(isMac
+          ? [{ type: 'separator' as const }, { role: 'front' as const, label: t('menu.front') }]
+          : [])
       ]
     },
     {
       role: 'help',
+      label: t('menu.help'),
       submenu: [
-        { label: '💡 Proponer una mejora…', click: () => openFeedback('mejora') },
-        { label: '🐞 Reportar un problema…', click: () => openFeedback('problema') },
-        {
-          label: 'Ver propuestas de la comunidad',
-          click: () => shell.openExternal('https://github.com/jmfraga/lumen-md/issues')
-        },
+        { label: t('menu.suggest'), click: () => openFeedback('mejora') },
+        { label: t('menu.report'), click: () => openFeedback('problema') },
+        { label: t('menu.community'), click: () => shell.openExternal(`${REPO}/issues`) },
         { type: 'separator' as const },
         ...(isMac
           ? []
-          : [{ label: 'Buscar actualizaciones…', click: () => void checkForUpdates(true) }]),
+          : [{ label: t('menu.checkUpdates'), click: () => void checkForUpdates(true) }]),
         {
-          label: 'Revisar actualizaciones automáticamente',
+          label: t('menu.autoCheckUpdates'),
           type: 'checkbox' as const,
           checked: prefs.checkUpdates,
           click: () => {
@@ -144,16 +182,10 @@ export function buildMenu(): Menu {
           }
         },
         { type: 'separator' as const },
+        { label: t('menu.github'), click: () => shell.openExternal(REPO) },
         {
-          label: 'Lumen en GitHub',
-          click: () => shell.openExternal('https://github.com/jmfraga/lumen-md')
-        },
-        {
-          label: 'Novedades de esta versión',
-          click: () =>
-            shell.openExternal(
-              `https://github.com/jmfraga/lumen-md/releases/tag/v${app.getVersion()}`
-            )
+          label: t('menu.releaseNotes'),
+          click: () => shell.openExternal(`${REPO}/releases/tag/v${app.getVersion()}`)
         }
       ]
     }

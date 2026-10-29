@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { InsertKind } from '../editor/insert'
+import type { MessageKey } from '../../../shared/i18n'
+import { useI18n } from '../i18n'
 
 interface Props {
   disabled?: boolean
@@ -7,29 +9,30 @@ interface Props {
   onInsertTable: (rows: number, cols: number) => void
 }
 
-const ITEMS: Array<{ kind: InsertKind; label: string; hint?: string } | 'sep' | 'table'> = [
-  { kind: 'h1', label: 'Título 1', hint: '#' },
-  { kind: 'h2', label: 'Título 2', hint: '##' },
-  { kind: 'h3', label: 'Título 3', hint: '###' },
-  { kind: 'paragraph', label: 'Texto normal' },
+const ITEMS: Array<{ kind: InsertKind; label: MessageKey; hint?: string } | 'sep' | 'table'> = [
+  { kind: 'h1', label: 'insert.h1', hint: '#' },
+  { kind: 'h2', label: 'insert.h2', hint: '##' },
+  { kind: 'h3', label: 'insert.h3', hint: '###' },
+  { kind: 'paragraph', label: 'insert.paragraph' },
   'sep',
-  { kind: 'bullet-list', label: 'Lista con viñetas', hint: '-' },
-  { kind: 'ordered-list', label: 'Lista numerada', hint: '1.' },
-  { kind: 'task-list', label: 'Lista de tareas', hint: '[ ]' },
-  { kind: 'quote', label: 'Cita', hint: '>' },
-  { kind: 'divider', label: 'Separador', hint: '---' },
+  { kind: 'bullet-list', label: 'insert.bulletList', hint: '-' },
+  { kind: 'ordered-list', label: 'insert.orderedList', hint: '1.' },
+  { kind: 'task-list', label: 'insert.taskList', hint: '[ ]' },
+  { kind: 'quote', label: 'insert.quote', hint: '>' },
+  { kind: 'divider', label: 'insert.divider', hint: '---' },
   'sep',
   'table',
-  { kind: 'code', label: 'Bloque de código', hint: '```' },
-  { kind: 'mermaid', label: 'Diagrama Mermaid' },
-  { kind: 'math', label: 'Fórmula LaTeX', hint: '$$' },
-  { kind: 'image', label: 'Imagen' }
+  { kind: 'code', label: 'insert.code', hint: '```' },
+  { kind: 'mermaid', label: 'insert.mermaid' },
+  { kind: 'math', label: 'insert.math', hint: '$$' },
+  { kind: 'image', label: 'insert.image' }
 ]
 
 const GRID = 8
 
 /** Botón "Insertar" con menú de bloques y selector de cuadrícula para tablas. */
 export function InsertMenu({ disabled, onInsert, onInsertTable }: Props): React.JSX.Element {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [grid, setGrid] = useState<{ r: number; c: number }>({ r: 0, c: 0 })
   const ref = useRef<HTMLDivElement>(null)
@@ -61,9 +64,9 @@ export function InsertMenu({ disabled, onInsert, onInsertTable }: Props): React.
         disabled={disabled}
         onMouseDown={keepFocus}
         onClick={() => setOpen((o) => !o)}
-        title="Insertar un bloque (o escribe / en una línea vacía)"
+        title={t('topbar.insertTitle')}
       >
-        + Insertar
+        {t('topbar.insert')}
       </button>
       {open && (
         <div className="lumen-insert-menu" role="menu" onMouseDown={keepFocus}>
@@ -73,7 +76,7 @@ export function InsertMenu({ disabled, onInsert, onInsertTable }: Props): React.
               return (
                 <div key="table" className="lumen-insert-table">
                   <div className="lumen-insert-label">
-                    Tabla {grid.r > 0 ? `${grid.r} × ${grid.c}` : ''}
+                    {t('insert.table')} {grid.r > 0 ? `${grid.r} × ${grid.c}` : ''}
                   </div>
                   <div className="lumen-insert-grid" onMouseLeave={() => setGrid({ r: 0, c: 0 })}>
                     {Array.from({ length: GRID * GRID }, (_, k) => {
@@ -90,7 +93,7 @@ export function InsertMenu({ disabled, onInsert, onInsertTable }: Props): React.
                             setOpen(false)
                             onInsertTable(r, c)
                           }}
-                          aria-label={`Tabla de ${r} filas por ${c} columnas`}
+                          aria-label={t('insert.tableSize', { r, c })}
                         />
                       )
                     })}
@@ -109,7 +112,7 @@ export function InsertMenu({ disabled, onInsert, onInsertTable }: Props): React.
                   onInsert(item.kind)
                 }}
               >
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
                 {item.hint && <code>{item.hint}</code>}
               </button>
             )

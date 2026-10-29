@@ -6,9 +6,10 @@ import { IPC } from '../shared/ipc'
 import type { OpenedFile, SaveResult, ExportResult, Preferences, AssetResult } from '../shared/ipc'
 import { ASSETS_DIR, uniqueAssetName } from '../shared/assets'
 import { createWindow, setWindowDirty, setWindowPath, stateOf } from './windows'
-import { addRecent, getPreferences, setPreferences } from './store'
+import { addRecent, getLang, getPreferences, setPreferences } from './store'
+import { isLang, t } from '../shared/i18n'
 import { writeHtml, writePdf } from './export'
-import { rebuildMenu } from './menu'
+import { rebuildMenu, setLanguage } from './menu'
 import {
   checkForUpdates,
   downloadUpdate,
@@ -66,7 +67,9 @@ function suggestedPath(
 ): string {
   const current = win ? stateOf(win).filePath : null
   const dir = current ? dirname(current) : app.getPath('documents')
-  const base = suggestedName ?? (current ? basename(current).replace(/\.[^.]+$/, '') : 'documento')
+  const base =
+    suggestedName ??
+    (current ? basename(current).replace(/\.[^.]+$/, '') : t(getLang(), 'app.defaultDocName'))
   return join(dir, `${base}.${ext}`)
 }
 
@@ -78,7 +81,7 @@ export function registerIpc(): void {
     try {
       return await readMarkdown(path)
     } catch (err) {
-      dialog.showErrorBox('No se pudo abrir el archivo', String(err))
+      dialog.showErrorBox(t(getLang(), 'dialog.openError'), String(err))
       if (win) setWindowPath(win, null)
       return null
     }
@@ -198,7 +201,10 @@ export function registerIpc(): void {
 
   ipcMain.handle(IPC.getPreferences, (): Preferences => getPreferences())
   ipcMain.handle(IPC.setPreferences, (_e, patch: Partial<Preferences>): Preferences => {
-    const prefs = setPreferences(patch)
+    const { language, ...rest } = patch
+    // Cambiar el idioma por aquí hace lo mismo que el menú: avisa a todas las ventanas.
+    if (isLang(language) && language !== getLang()) setLanguage(language)
+    const prefs = setPreferences(rest)
     rebuildMenu()
     return prefs
   })

@@ -13,6 +13,12 @@
 - [x] Actualizaciones: aviso al abrir y cada 24 h, descarga y reinicio a petición del usuario
 - [x] Propuestas y reportes por GitHub Issues desde la app, con plantillas en español
 
+## v0.4 (2026-10-29)
+
+- [x] Interfaz en español e inglés, detectada del sistema y con selector en Ver → Idioma · Language
+- [x] Atajos con ⌘ en Mac y Ctrl en Windows/Linux en los tooltips
+- [x] README y plantillas de propuestas en inglés
+
 ## Después
 
 En orden aproximado de interés:

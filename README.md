@@ -1,8 +1,12 @@
+**Español** · [English](README.en.md)
+
 # Lumen
 
 **Lector y editor Markdown que no te rompe las tablas.** Libre, sin cuentas y sin costo, para macOS, Windows y Linux.
 
 Lumen nació para revisar con comodidad los documentos `.md` que generan ChatGPT, Claude, Gemini y compañía: se abren con doble clic y se ven como un documento terminado (tablas, código con colores, diagramas, fórmulas), se editan sin saber Markdown y se guardan como Markdown limpio.
+
+La interfaz está en **español e inglés**. Lumen sigue el idioma de tu sistema y lo puedes cambiar cuando quieras en **Ver → Idioma · Language**.
 
 ![Lumen mostrando un documento con tabla, cita y barra de formato](docs/img/editor-claro.png)
 
@@ -51,6 +55,10 @@ sudo apt install ./lumen-md_x.y.z_amd64.deb
 
 Queda registrado como aplicación para `text/markdown`, así que el doble clic funciona.
 
+### Idioma
+
+Lumen arranca en el idioma de tu sistema: español si tu sistema está en español, inglés en cualquier otro caso. Para cambiarlo, ve a **Ver → Idioma · Language** y elige **Español** o **English**. El cambio es inmediato, no reinicia la app y no toca el documento abierto. El nombre del menú es bilingüe a propósito, para que cualquiera lo encuentre.
+
 ### Actualizar
 
 Desde la versión 0.3.0, Lumen revisa si hay una versión nueva al abrirse y una vez al día. Si la hay, aparece una franja arriba del documento:
@@ -68,7 +76,7 @@ Si tienes una versión anterior a la 0.3.0, descarga esta una vez desde el enlac
 
 Las ideas y los problemas viven en los [issues del repositorio](https://github.com/jmfraga/lumen-md/issues), donde todos pueden verlos, comentarlos y votarlos con 👍. De ahí salen las versiones nuevas.
 
-- Desde la app: botón **💡 Sugerir mejora** en la barra inferior, o menú **Ayuda → Proponer una mejora… / Reportar un problema…**. Se abre GitHub con la plantilla en español y con tu versión y sistema ya llenos.
+- Desde la app: botón **💡 Sugerir mejora** en la barra inferior, o menú **Ayuda → Proponer una mejora… / Reportar un problema…**. Se abre GitHub con la plantilla en el idioma de Lumen y con tu versión y sistema ya llenos.
 - Desde el navegador: [proponer una mejora](https://github.com/jmfraga/lumen-md/issues/new?template=mejora.yml) o [reportar un problema](https://github.com/jmfraga/lumen-md/issues/new?template=problema.yml).
 
 Necesitas una cuenta gratuita de GitHub. No hace falta saber programar: cuéntalo como se lo contarías a un amigo.
@@ -100,6 +108,7 @@ Necesitas una cuenta gratuita de GitHub. No hace falta saber programar: cuéntal
 - **Doble clic** sobre un `.md` lo abre; una ventana por documento; arrastrar y soltar; menú de recientes.
 - **Autoguardado** (se apaga en el menú Archivo). Aviso al cerrar si hay cambios sin guardar.
 - **Exportar a HTML** autocontenido y **a PDF** (`Cmd/Ctrl+P`).
+- Interfaz en **español e inglés**, intercambiable en cualquier momento.
 - Tema claro y oscuro siguiendo el sistema.
 
   ![Asistente de secuencia en tema oscuro](docs/img/asistente-secuencia-oscuro.png)
@@ -121,7 +130,7 @@ Necesitas una cuenta gratuita de GitHub. No hace falta saber programar: cuéntal
 
 **¿Dónde quedan las imágenes que pego?** En una carpeta `assets/` junto al `.md`. El documento debe estar guardado antes para saber dónde está "junto".
 
-**¿Manda algo a internet?** No. Todo corre en tu computadora. Las únicas conexiones son las imágenes con URL externa que tenga tu documento.
+**¿Manda algo a internet?** Tus documentos no. Todo corre en tu computadora. Las únicas conexiones son las imágenes con URL externa que tenga tu documento y la revisión diaria de actualizaciones contra GitHub, que puedes apagar en el menú Ayuda.
 
 **¿Puedo usarlo con Obsidian?** Sí: abre los mismos `.md`; el frontmatter y los `[[wikilinks]]` se conservan.
 
@@ -136,10 +145,17 @@ npm install
 npm run dev        # app con recarga en caliente
 npm test           # vitest: fidelidad del round-trip + unitarias
 npm run typecheck
+npm run size       # presupuesto de tamaño (también en CI)
 npm run build:mac  # o build:win / build:linux
 ```
 
 Requiere Node 22+. Stack: Electron, React, TypeScript, Milkdown (ProseMirror), CodeMirror 6, Mermaid, KaTeX, unified/remark para exportar.
+
+Lumen es ligero a propósito. Cada función nueva debe ganarse su lugar: nada que corra al arrancar si puede esperar, y el presupuesto de tamaño del CI no se sube sin una razón escrita.
+
+### Traducciones
+
+Los textos de la interfaz viven en `src/shared/i18n.ts`, en dos diccionarios simples sin librería de traducción. El diccionario en inglés está tipado para que una clave faltante rompa el typecheck, y `tests/i18n.test.ts` revisa que las variables coincidan entre idiomas, que el inglés sea americano y consistente, y que no quede texto en español escrito a mano en la interfaz. Para agregar una frase, agrégala en los dos diccionarios.
 
 ### Fidelidad del Markdown
 

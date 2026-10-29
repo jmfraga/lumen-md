@@ -12,36 +12,39 @@ import {
   type MessageStyle
 } from '../editor/mermaid-builder'
 import { renderMermaid } from '../editor/mermaid'
+import { useI18n } from '../i18n'
+import type { MessageKey } from '../../../shared/i18n'
 
 interface Props {
   onInsert: (code: string) => void
   onClose: () => void
 }
 
-const SHAPES: Array<[NodeShape, string]> = [
-  ['rect', 'Rectángulo'],
-  ['round', 'Redondeado'],
-  ['diamond', 'Decisión'],
-  ['circle', 'Círculo']
+const SHAPES: Array<[NodeShape, MessageKey]> = [
+  ['rect', 'wizard.shapeRect'],
+  ['round', 'wizard.shapeRound'],
+  ['diamond', 'wizard.shapeDiamond'],
+  ['circle', 'wizard.shapeCircle']
 ]
-const EDGES: Array<[EdgeStyle, string]> = [
-  ['arrow', 'Flecha'],
-  ['dotted', 'Punteada'],
-  ['thick', 'Gruesa'],
-  ['line', 'Línea']
+const EDGES: Array<[EdgeStyle, MessageKey]> = [
+  ['arrow', 'wizard.edgeArrow'],
+  ['dotted', 'wizard.edgeDotted'],
+  ['thick', 'wizard.edgeThick'],
+  ['line', 'wizard.edgeLine']
 ]
-const MESSAGES: Array<[MessageStyle, string]> = [
-  ['sync', 'Mensaje'],
-  ['reply', 'Respuesta'],
-  ['async', 'Asíncrono'],
-  ['dotted', 'Punteado']
+const MESSAGES: Array<[MessageStyle, MessageKey]> = [
+  ['sync', 'wizard.msgSync'],
+  ['reply', 'wizard.msgReply'],
+  ['async', 'wizard.msgAsync'],
+  ['dotted', 'wizard.msgDotted']
 ]
 
 /** Asistente visual: formulario → código Mermaid → vista previa. Inserta un bloque ```mermaid. */
 export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
+  const { t, lang } = useI18n()
   const [kind, setKind] = useState<'flowchart' | 'sequence'>('flowchart')
-  const [flow, setFlow] = useState<FlowchartSpec>(defaultFlowchart)
-  const [seq, setSeq] = useState<SequenceSpec>(defaultSequence)
+  const [flow, setFlow] = useState<FlowchartSpec>(() => defaultFlowchart(lang))
+  const [seq, setSeq] = useState<SequenceSpec>(() => defaultSequence(lang))
   const [svg, setSvg] = useState<string | null>(null)
   const [error, setError] = useState(false)
 
@@ -162,27 +165,23 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
       className="lumen-modal-backdrop"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        className="lumen-modal lumen-wizard"
-        role="dialog"
-        aria-label="Asistente de diagrama Mermaid"
-      >
+      <div className="lumen-modal lumen-wizard" role="dialog" aria-label={t('wizard.aria')}>
         <header className="lumen-wizard-head">
-          <strong>Diagrama Mermaid</strong>
+          <strong>{t('wizard.title')}</strong>
           <div className="lumen-wizard-kind">
             <button
               type="button"
               className={kind === 'flowchart' ? 'active' : ''}
               onClick={() => setKind('flowchart')}
             >
-              Flujo
+              {t('wizard.flowchart')}
             </button>
             <button
               type="button"
               className={kind === 'sequence' ? 'active' : ''}
               onClick={() => setKind('sequence')}
             >
-              Secuencia
+              {t('wizard.sequence')}
             </button>
           </div>
         </header>
@@ -192,27 +191,27 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
             {kind === 'flowchart' ? (
               <>
                 <label className="lumen-field">
-                  Dirección
+                  {t('wizard.direction')}
                   <select
                     value={flow.direction}
                     onChange={(e) =>
                       setFlow({ ...flow, direction: e.target.value as FlowchartSpec['direction'] })
                     }
                   >
-                    <option value="LR">Izquierda → derecha</option>
-                    <option value="TD">Arriba → abajo</option>
-                    <option value="RL">Derecha → izquierda</option>
-                    <option value="BT">Abajo → arriba</option>
+                    <option value="LR">{t('wizard.dirLR')}</option>
+                    <option value="TD">{t('wizard.dirTD')}</option>
+                    <option value="RL">{t('wizard.dirRL')}</option>
+                    <option value="BT">{t('wizard.dirBT')}</option>
                   </select>
                 </label>
 
-                <h4>Nodos</h4>
+                <h4>{t('wizard.nodes')}</h4>
                 {flow.nodes.map((n, i) => (
                   <div className="lumen-row" key={n.id}>
                     <code>{n.id}</code>
                     <input
                       value={n.label}
-                      placeholder="Texto del nodo"
+                      placeholder={t('wizard.nodeText')}
                       onChange={(e) => setNode(i, { label: e.target.value })}
                       autoFocus={i === 0}
                     />
@@ -222,7 +221,7 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                     >
                       {SHAPES.map(([v, l]) => (
                         <option key={v} value={v}>
-                          {l}
+                          {t(l)}
                         </option>
                       ))}
                     </select>
@@ -230,17 +229,17 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                       type="button"
                       className="lumen-x"
                       onClick={() => removeNode(i)}
-                      title="Quitar nodo"
+                      title={t('wizard.removeNode')}
                     >
                       ×
                     </button>
                   </div>
                 ))}
                 <button type="button" className="lumen-add" onClick={addNode}>
-                  + Nodo
+                  {t('wizard.addNode')}
                 </button>
 
-                <h4>Conexiones</h4>
+                <h4>{t('wizard.connections')}</h4>
                 {flow.edges.map((e, i) => (
                   <div className="lumen-row" key={i}>
                     <select value={e.from} onChange={(ev) => setEdge(i, { from: ev.target.value })}>
@@ -252,7 +251,7 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                     >
                       {EDGES.map(([v, l]) => (
                         <option key={v} value={v}>
-                          {l}
+                          {t(l)}
                         </option>
                       ))}
                     </select>
@@ -261,32 +260,32 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                     </select>
                     <input
                       value={e.label}
-                      placeholder="Etiqueta (opcional)"
+                      placeholder={t('wizard.edgeLabel')}
                       onChange={(ev) => setEdge(i, { label: ev.target.value })}
                     />
                     <button
                       type="button"
                       className="lumen-x"
                       onClick={() => removeEdge(i)}
-                      title="Quitar conexión"
+                      title={t('wizard.removeEdge')}
                     >
                       ×
                     </button>
                   </div>
                 ))}
                 <button type="button" className="lumen-add" onClick={addEdge}>
-                  + Conexión
+                  {t('wizard.addEdge')}
                 </button>
               </>
             ) : (
               <>
-                <h4>Participantes</h4>
+                <h4>{t('wizard.participants')}</h4>
                 {seq.participants.map((p, i) => (
                   <div className="lumen-row" key={p.id}>
                     <code>{p.id}</code>
                     <input
                       value={p.label}
-                      placeholder="Nombre"
+                      placeholder={t('wizard.participantName')}
                       onChange={(e) => setPart(i, e.target.value)}
                       autoFocus={i === 0}
                     />
@@ -294,17 +293,17 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                       type="button"
                       className="lumen-x"
                       onClick={() => removePart(i)}
-                      title="Quitar participante"
+                      title={t('wizard.removeParticipant')}
                     >
                       ×
                     </button>
                   </div>
                 ))}
                 <button type="button" className="lumen-add" onClick={addPart}>
-                  + Participante
+                  {t('wizard.addParticipant')}
                 </button>
 
-                <h4>Mensajes</h4>
+                <h4>{t('wizard.messages')}</h4>
                 {seq.messages.map((m, i) => (
                   <div className="lumen-row" key={i}>
                     <select value={m.from} onChange={(e) => setMsg(i, { from: e.target.value })}>
@@ -316,7 +315,7 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                     >
                       {MESSAGES.map(([v, l]) => (
                         <option key={v} value={v}>
-                          {l}
+                          {t(l)}
                         </option>
                       ))}
                     </select>
@@ -325,21 +324,21 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
                     </select>
                     <input
                       value={m.text}
-                      placeholder="Texto del mensaje"
+                      placeholder={t('wizard.messageText')}
                       onChange={(e) => setMsg(i, { text: e.target.value })}
                     />
                     <button
                       type="button"
                       className="lumen-x"
                       onClick={() => removeMsg(i)}
-                      title="Quitar mensaje"
+                      title={t('wizard.removeMessage')}
                     >
                       ×
                     </button>
                   </div>
                 ))}
                 <button type="button" className="lumen-add" onClick={addMsg}>
-                  + Mensaje
+                  {t('wizard.addMessage')}
                 </button>
               </>
             )}
@@ -350,13 +349,9 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
               className={`lumen-wizard-svg${error ? ' error' : ''}`}
               dangerouslySetInnerHTML={{ __html: svg ?? '' }}
             />
-            {error && (
-              <div className="lumen-wizard-error">
-                El diagrama no es válido todavía; revisa las conexiones.
-              </div>
-            )}
+            {error && <div className="lumen-wizard-error">{t('wizard.invalid')}</div>}
             <details>
-              <summary>Código generado</summary>
+              <summary>{t('wizard.code')}</summary>
               <pre>
                 <code>{code}</code>
               </pre>
@@ -365,12 +360,10 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
         </div>
 
         <footer className="lumen-wizard-foot">
-          <span className="lumen-hint">
-            Después de insertarlo puedes seguir editando el código en el bloque.
-          </span>
+          <span className="lumen-hint">{t('wizard.hint')}</span>
           <div>
             <button type="button" onClick={onClose}>
-              Cancelar
+              {t('wizard.cancel')}
             </button>
             <button
               type="button"
@@ -378,7 +371,7 @@ export function MermaidWizard({ onInsert, onClose }: Props): React.JSX.Element {
               disabled={error}
               onClick={() => onInsert(code)}
             >
-              Insertar diagrama
+              {t('wizard.insert')}
             </button>
           </div>
         </footer>

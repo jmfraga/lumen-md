@@ -17,6 +17,7 @@ import {
 } from '@milkdown/kit/preset/commonmark'
 import { createTable } from '@milkdown/kit/preset/gfm'
 import { imageBlockSchema } from '@milkdown/kit/component/image-block'
+import { translator, type Lang } from '../../../shared/i18n'
 
 /**
  * Acciones de inserción. Son las mismas que usa el menú `/` de Crepe, expuestas
@@ -38,10 +39,14 @@ export type InsertKind =
   | 'math'
   | 'mermaid'
 
-export const MERMAID_TEMPLATE = `flowchart LR
-  A[Inicio] --> B{¿Decisión?}
-  B -- Sí --> C[Resultado]
-  B -- No --> D[Otro camino]`
+/** Plantilla inicial de un diagrama de flujo, en el idioma de la interfaz. */
+export function mermaidTemplate(lang: Lang = 'es'): string {
+  const t = translator(lang)
+  return `flowchart LR
+  A[${t('tpl.start')}] --> B{${t('tpl.decision')}}
+  B -- ${t('tpl.yes')} --> C[${t('tpl.result')}]
+  B -- ${t('tpl.no')} --> D[${t('tpl.otherPath')}]`
+}
 
 function setBlock(
   ctx: Ctx,
@@ -93,7 +98,7 @@ export function insertTable(ctx: Ctx, rows: number, cols: number): void {
   view.focus()
 }
 
-export function insert(ctx: Ctx, kind: InsertKind): void {
+export function insert(ctx: Ctx, kind: InsertKind, lang: Lang = 'es'): void {
   switch (kind) {
     case 'paragraph':
       return setBlock(ctx, paragraphSchema.type(ctx))
@@ -118,6 +123,6 @@ export function insert(ctx: Ctx, kind: InsertKind): void {
     case 'math':
       return addBlock(ctx, codeBlockSchema.type(ctx), { language: 'LaTeX' })
     case 'mermaid':
-      return insertCodeBlockWithContent(ctx, 'mermaid', MERMAID_TEMPLATE)
+      return insertCodeBlockWithContent(ctx, 'mermaid', mermaidTemplate(lang))
   }
 }

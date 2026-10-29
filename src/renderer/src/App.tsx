@@ -13,6 +13,8 @@ import { MermaidWizard } from './ui/MermaidWizard'
 import { UpdateBanner } from './ui/UpdateBanner'
 import type { UpdateState } from '../../shared/update'
 import type { MenuCommand } from '../../shared/ipc'
+import { translator, type Lang, type Message } from '../../shared/i18n'
+import { I18nContext, type I18n } from './i18n'
 
 function dirOf(path: string | null): string | null {
   if (!path) return null
@@ -20,8 +22,8 @@ function dirOf(path: string | null): string | null {
   return i > 0 ? path.slice(0, i) : null
 }
 
-function nameOf(path: string | null): string {
-  if (!path) return 'Sin título'
+function nameOf(path: string | null, untitled: string): string {
+  if (!path) return untitled
   return path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1)
 }
 
@@ -40,6 +42,12 @@ export default function App(): React.JSX.Element {
   const [dragging, setDragging] = useState(false)
   const [wizard, setWizard] = useState(false)
   const [update, setUpdate] = useState<UpdateState>({ status: 'idle' })
+  const [lang, setLang] = useState<Lang>('es')
+  const i18n = useMemo<I18n>(
+    () => ({ lang, t: translator(lang), platform: window.lumen.platform }),
+    [lang]
+  )
+  const untitled = i18n.t('app.untitled')
   const busy = useRef(false)
   const editorRef = useRef<WysiwygHandle>(null)
 
@@ -58,6 +66,7 @@ export default function App(): React.JSX.Element {
     void (async () => {
       const prefs = await window.lumen.getPreferences()
       store.setAutosave(prefs.autosave)
+      setLang(prefs.language)
       const file = await window.lumen.getInitialFile()
       if (file) store.load(file.path, file.content)
       setLoaded(true)
@@ -70,6 +79,20 @@ export default function App(): React.JSX.Element {
   }, [doc.dirty])
 
   useEffect(() => window.lumen.onOpenPath((p) => void loadPath(p)), [loadPath])
+
+  // Idioma: el atributo lang del documento y, al cambiar desde el menú, remontar
+  // los editores para que tomen sus textos nuevos. El documento vive en el store: no se pierde.
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
+  useEffect(
+    () =>
+      window.lumen.onLanguage((next) => {
+        setLang(next)
+        setEpoch((e) => e + 1)
+      }),
+    []
+  )
 
   // Actualizaciones: estado inicial (otra ventana pudo haberlo recibido antes) y cambios.
   useEffect(() => {
@@ -86,10 +109,10 @@ export default function App(): React.JSX.Element {
   const saveAs = useCallback(async () => {
     const res = await window.lumen.saveFileAs(
       store.get().text,
-      nameOf(store.get().path).replace(/\.[^.]+$/, '')
+      nameOf(store.get().path, untitled).replace(/\.[^.]+$/, '')
     )
     if (res.ok && res.path) store.markSavedAs(res.path)
-  }, [store])
+  }, [store, untitled])
 
   const save = useCallback(async () => {
     if (store.get().path) await store.save()
@@ -100,21 +123,27 @@ export default function App(): React.JSX.Element {
     async (kind: 'html' | 'pdf') => {
       if (busy.current) return
       busy.current = true
-      store.setStatus(kind === 'pdf' ? 'Generando PDF…' : 'Generando HTML…')
+      store.setStatus({ key: kind === 'pdf' ? 'msg.exportingPdf' : 'msg.exportingHtml' })
       try {
         const { text, path } = store.get()
-        const title = nameOf(path).replace(/\.[^.]+$/, '')
-        const html = await buildExportHtml(text, title, dirOf(path))
+        const title = nameOf(path, untitled).replace(/\.[^.]+$/, '')
+        const html = await buildExportHtml(text, title, dirOf(path), lang)
         const res =
           kind === 'pdf'
             ? await window.lumen.exportPdf(html, title)
             : await window.lumen.exportHtml(html, title)
-        store.setStatus(res.ok ? `Exportado: ${res.path}` : res.error ? `Error: ${res.error}` : '')
+        store.setStatus(
+          res.ok
+            ? { key: 'msg.exported', vars: { path: res.path ?? '' } }
+            : res.error
+              ? { key: 'msg.error', vars: { error: res.error } }
+              : null
+        )
       } finally {
         busy.current = false
       }
     },
-    [store]
+    [store, untitled, lang]
   )
 
   const toggleSource = useCallback(() => {
@@ -196,11 +225,14 @@ export default function App(): React.JSX.Element {
   }, [store, loadPath])
 
   const onChange = useCallback((text: string) => store.update(text), [store])
-  const onStatus = useCallback((msg: string) => store.setStatus(msg), [store])
-  const onInsert = useCallback((kind: InsertKind) => {
-    if (kind === 'mermaid') return setWizard(true)
-    editorRef.current?.run((ctx) => insert(ctx, kind))
-  }, [])
+  const onStatus = useCallback((msg: Message) => store.setStatus(msg), [store])
+  const onInsert = useCallback(
+    (kind: InsertKind) => {
+      if (kind === 'mermaid') return setWizard(true)
+      editorRef.current?.run((ctx) => insert(ctx, kind, lang))
+    },
+    [lang]
+  )
   const onInsertMermaid = useCallback((code: string) => {
     setWizard(false)
     editorRef.current?.run((ctx) => insertCodeBlockWithContent(ctx, 'mermaid', code))
@@ -213,45 +245,48 @@ export default function App(): React.JSX.Element {
   if (!loaded) return <div className="lumen-app" />
 
   return (
-    <div className="lumen-app">
-      <TopBar
-        name={nameOf(doc.path)}
-        dirty={doc.dirty}
-        mode={doc.mode}
-        onToggleSource={toggleSource}
-        onOpen={() => void window.lumen.openFileDialog()}
-        onSave={() => void save()}
-        onExportHtml={() => void exportAs('html')}
-        onExportPdf={() => void exportAs('pdf')}
-        onInsert={onInsert}
-        onInsertTable={onInsertTable}
-      />
-      <UpdateBanner state={update} saveBeforeRestart={saveBeforeRestart} />
-      <main className="lumen-main">
-        {doc.mode === 'wysiwyg' ? (
-          <WysiwygEditor
-            ref={editorRef}
-            key={`w${epoch}`}
-            initialText={doc.text}
-            baseDir={dirOf(doc.path)}
-            docPath={doc.path}
-            onChange={onChange}
-            onStatus={onStatus}
-          />
-        ) : (
-          <SourceEditor key={`s${epoch}`} initialText={doc.text} onChange={onChange} />
-        )}
-      </main>
-      <StatusBar
-        path={doc.path}
-        autosave={doc.autosave}
-        dirty={doc.dirty}
-        status={doc.status}
-        mode={doc.mode}
-        text={doc.text}
-      />
-      {wizard && <MermaidWizard onInsert={onInsertMermaid} onClose={() => setWizard(false)} />}
-      {dragging && <DropOverlay />}
-    </div>
+    <I18nContext.Provider value={i18n}>
+      <div className="lumen-app">
+        <TopBar
+          name={nameOf(doc.path, untitled)}
+          dirty={doc.dirty}
+          mode={doc.mode}
+          onToggleSource={toggleSource}
+          onOpen={() => void window.lumen.openFileDialog()}
+          onSave={() => void save()}
+          onExportHtml={() => void exportAs('html')}
+          onExportPdf={() => void exportAs('pdf')}
+          onInsert={onInsert}
+          onInsertTable={onInsertTable}
+        />
+        <UpdateBanner state={update} saveBeforeRestart={saveBeforeRestart} />
+        <main className="lumen-main">
+          {doc.mode === 'wysiwyg' ? (
+            <WysiwygEditor
+              ref={editorRef}
+              key={`w${epoch}`}
+              initialText={doc.text}
+              baseDir={dirOf(doc.path)}
+              docPath={doc.path}
+              onChange={onChange}
+              onStatus={onStatus}
+              lang={lang}
+            />
+          ) : (
+            <SourceEditor key={`s${epoch}`} initialText={doc.text} onChange={onChange} />
+          )}
+        </main>
+        <StatusBar
+          path={doc.path}
+          autosave={doc.autosave}
+          dirty={doc.dirty}
+          status={doc.status}
+          mode={doc.mode}
+          text={doc.text}
+        />
+        {wizard && <MermaidWizard onInsert={onInsertMermaid} onClose={() => setWizard(false)} />}
+        {dragging && <DropOverlay />}
+      </div>
+    </I18nContext.Provider>
   )
 }

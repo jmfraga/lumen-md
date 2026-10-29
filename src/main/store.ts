@@ -2,11 +2,15 @@ import { app } from 'electron'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import type { Preferences } from '../shared/ipc'
+import { detectLang, isLang, type Lang } from '../shared/i18n'
 
 /** Persistencia mínima en userData/lumen.json: preferencias y recientes. Sin dependencias. */
 
+/** En disco el idioma es opcional: sin elección explícita se sigue al sistema. */
+type StoredPreferences = Omit<Preferences, 'language'> & { language?: Lang }
+
 interface StoreData {
-  preferences: Preferences
+  preferences: StoredPreferences
   recents: string[]
 }
 
@@ -47,15 +51,33 @@ function persist(): void {
   }
 }
 
+/** Idioma del sistema. LUMEN_LANG lo fuerza (pruebas y capturas). */
+export function systemLang(): Lang {
+  const forced = process.env['LUMEN_LANG']
+  if (isLang(forced)) return forced
+  const preferred = app.getPreferredSystemLanguages?.()[0]
+  return detectLang(preferred || app.getLocale())
+}
+
+function resolve(prefs: StoredPreferences): Preferences {
+  const forced = process.env['LUMEN_LANG']
+  const language = isLang(forced) ? forced : isLang(prefs.language) ? prefs.language : systemLang()
+  return { ...prefs, language }
+}
+
 export function getPreferences(): Preferences {
-  return { ...load().preferences }
+  return resolve(load().preferences)
+}
+
+export function getLang(): Lang {
+  return getPreferences().language
 }
 
 export function setPreferences(patch: Partial<Preferences>): Preferences {
   const data = load()
   data.preferences = { ...data.preferences, ...patch }
   persist()
-  return { ...data.preferences }
+  return resolve(data.preferences)
 }
 
 export function getRecents(): string[] {

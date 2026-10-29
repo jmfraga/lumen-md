@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import type { Message } from '../../../shared/i18n'
 
 /**
  * Fuente de verdad del documento: el texto Markdown.
@@ -15,7 +16,8 @@ export interface DocumentState {
   dirty: boolean
   mode: ViewMode
   autosave: boolean
-  status: string
+  /** Mensaje para la barra de estado, como clave: se traduce al mostrarse. */
+  status: Message | null
 }
 
 type Listener = () => void
@@ -30,7 +32,7 @@ export class DocumentStore {
     dirty: false,
     mode: 'wysiwyg',
     autosave: true,
-    status: ''
+    status: null
   }
   private listeners = new Set<Listener>()
   private autosaveTimer: ReturnType<typeof setTimeout> | null = null
@@ -51,7 +53,7 @@ export class DocumentStore {
 
   load(path: string | null, text: string): void {
     this.cancelAutosave()
-    this.set({ path, text, savedText: text, dirty: false, status: '' })
+    this.set({ path, text, savedText: text, dirty: false, status: null })
   }
 
   /** Cambio desde cualquiera de las dos vistas. */
@@ -72,7 +74,7 @@ export class DocumentStore {
     if (!autosave) this.cancelAutosave()
   }
 
-  setStatus(status: string): void {
+  setStatus(status: Message | null): void {
     this.set({ status })
   }
 
@@ -85,16 +87,16 @@ export class DocumentStore {
     if (ok) {
       // Si el usuario siguió escribiendo durante el guardado, sigue sucio.
       const stillDirty = this.state.text !== text
-      this.set({ savedText: text, dirty: stillDirty, status: 'Guardado' })
+      this.set({ savedText: text, dirty: stillDirty, status: { key: 'msg.saved' } })
     } else {
-      this.set({ status: 'Error al guardar' })
+      this.set({ status: { key: 'msg.saveError' } })
     }
     return ok
   }
 
   /** Tras un "guardar como" exitoso, main ya escribió el archivo. */
   markSavedAs(path: string): void {
-    this.set({ path, savedText: this.state.text, dirty: false, status: 'Guardado' })
+    this.set({ path, savedText: this.state.text, dirty: false, status: { key: 'msg.saved' } })
   }
 
   flushAutosave(): Promise<boolean> | null {
