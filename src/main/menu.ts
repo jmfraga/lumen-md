@@ -109,9 +109,8 @@ export function buildMenu(): Menu {
           click: () => send('toggle-autosave')
         },
         { type: 'separator' },
-        isMac
-          ? { role: 'close', label: t('menu.closeWindow') }
-          : { role: 'quit', label: t('menu.quit') }
+        { role: 'close', label: t('menu.closeWindow') },
+        ...(isMac ? [] : [{ role: 'quit' as const, label: t('menu.quit') }])
       ]
     },
     {

@@ -53,9 +53,9 @@ describe('exportación a HTML', () => {
 describe('resolución de rutas de imagen', () => {
   it('convierte relativas a lumen://', () => {
     expect(resolveAssetUrl('./img/a.png', '/Users/x/docs')).toBe(
-      'lumen://file//Users/x/docs/img/a.png'
+      'lumen://file/Users/x/docs/img/a.png'
     )
-    expect(resolveAssetUrl('../a.png', '/Users/x/docs')).toBe('lumen://file//Users/x/a.png')
+    expect(resolveAssetUrl('../a.png', '/Users/x/docs')).toBe('lumen://file/Users/x/a.png')
   })
   it('deja remotas y data intactas', () => {
     expect(resolveAssetUrl('https://a/b.png', '/x')).toBe('https://a/b.png')

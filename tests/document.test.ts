@@ -57,4 +57,17 @@ describe('DocumentStore', () => {
     expect(store.get().dirty).toBe(true)
     expect(store.get().savedText).toBe('ab')
   })
+
+  it('guardar como: si se escribió durante el diálogo, sigue sucio', () => {
+    const store = new DocumentStore({ save: async () => true })
+    store.load(null, '')
+    store.update('a')
+    const written = store.get().text
+    store.update('ab') // el usuario sigue escribiendo con el diálogo abierto
+    store.markSavedAs('/n.md', written)
+    expect(store.get().path).toBe('/n.md')
+    expect(store.get().dirty).toBe(true)
+    store.markSavedAs('/n.md')
+    expect(store.get().dirty).toBe(false)
+  })
 })

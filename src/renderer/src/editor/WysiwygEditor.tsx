@@ -56,11 +56,15 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
   const onChangeRef = useRef(onChange)
   const onStatusRef = useRef(onStatus)
   const docPathRef = useRef(docPath)
+  // "Guardar como" cambia la ruta sin remontar el editor: las imágenes relativas
+  // deben resolverse contra la carpeta nueva.
+  const baseDirRef = useRef(baseDir)
   useEffect(() => {
     onChangeRef.current = onChange
     onStatusRef.current = onStatus
     docPathRef.current = docPath
-  }, [onChange, onStatus, docPath])
+    baseDirRef.current = baseDir
+  }, [onChange, onStatus, docPath, baseDir])
 
   useEffect(() => {
     const root = rootRef.current
@@ -176,7 +180,7 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
           previewOnlyByDefault: true
         },
         [Crepe.Feature.ImageBlock]: {
-          proxyDomURL: (url: string) => resolveAssetUrl(url, baseDir),
+          proxyDomURL: (url: string) => resolveAssetUrl(url, baseDirRef.current),
           onUpload: upload,
           blockOnUpload: upload,
           inlineOnUpload: upload,
@@ -213,7 +217,7 @@ export const WysiwygEditor = forwardRef<WysiwygHandle, Props>(function WysiwygEd
       interactionEvents.forEach((ev) => root.removeEventListener(ev, markInteracted, true))
       void crepe.destroy()
     }
-    // initialText/baseDir cambian solo al cargar otro documento (la key del componente lo fuerza).
+    // initialText cambia solo al cargar otro documento (la key del componente lo fuerza).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

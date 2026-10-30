@@ -94,9 +94,14 @@ export class DocumentStore {
     return ok
   }
 
-  /** Tras un "guardar como" exitoso, main ya escribió el archivo. */
-  markSavedAs(path: string): void {
-    this.set({ path, savedText: this.state.text, dirty: false, status: { key: 'msg.saved' } })
+  /** Tras un "guardar como" exitoso, main ya escribió `written` en el archivo. */
+  markSavedAs(path: string, written: string = this.state.text): void {
+    this.set({
+      path,
+      savedText: written,
+      dirty: this.state.text !== written,
+      status: { key: 'msg.saved' }
+    })
   }
 
   flushAutosave(): Promise<boolean> | null {

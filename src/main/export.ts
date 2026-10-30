@@ -1,5 +1,6 @@
-import { BrowserWindow } from 'electron'
-import { writeFile } from 'fs/promises'
+import { app, BrowserWindow } from 'electron'
+import { mkdtemp, rm, writeFile } from 'fs/promises'
+import { join } from 'path'
 
 /**
  * Exportación. El renderer ya entrega un HTML autocontenido (CSS inline,
@@ -12,12 +13,23 @@ export async function writeHtml(path: string, html: string): Promise<void> {
 }
 
 export async function writePdf(path: string, html: string): Promise<void> {
+  // Archivo temporal y no data: URL — Chromium corta las URL de ~2 MB y un
+  // documento con varias imágenes embebidas las rebasa. Sin JavaScript: el HTML
+  // exportado ya viene renderizado y un <script> del .md no debe correr aquí.
+  const dir = await mkdtemp(join(app.getPath('temp'), 'lumen-pdf-'))
+  const tmp = join(dir, 'export.html')
+  await writeFile(tmp, html, 'utf8')
   const win = new BrowserWindow({
     show: false,
-    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false }
+    webPreferences: {
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      javascript: false
+    }
   })
   try {
-    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html))
+    await win.loadFile(tmp)
     // Damos tiempo a fuentes e imágenes embebidas.
     await new Promise((r) => setTimeout(r, 300))
     const pdf = await win.webContents.printToPDF({
@@ -28,5 +40,6 @@ export async function writePdf(path: string, html: string): Promise<void> {
     await writeFile(path, pdf)
   } finally {
     win.destroy()
+    await rm(dir, { recursive: true, force: true })
   }
 }

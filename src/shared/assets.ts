@@ -53,3 +53,12 @@ export function uniqueAssetName(
   while (exists(candidate)) candidate = `${base}-${i++}.${ext}`
   return candidate
 }
+
+/** Inverso de resolveAssetUrl: de `lumen://file/…` a la ruta en disco. Puro, usado por main. */
+export function assetPathFromUrl(url: string): string | null {
+  const u = new URL(url)
+  if (u.host !== 'file') return null
+  const path = decodeURIComponent(u.pathname)
+  // El pathname siempre empieza con "/": en Windows sobra delante de la unidad.
+  return /^\/[a-zA-Z]:\//.test(path) ? path.slice(1) : path
+}

@@ -107,11 +107,12 @@ export default function App(): React.JSX.Element {
   }, [store])
 
   const saveAs = useCallback(async () => {
+    const written = store.get().text
     const res = await window.lumen.saveFileAs(
-      store.get().text,
+      written,
       nameOf(store.get().path, untitled).replace(/\.[^.]+$/, '')
     )
-    if (res.ok && res.path) store.markSavedAs(res.path)
+    if (res.ok && res.path) store.markSavedAs(res.path, written)
   }, [store, untitled])
 
   const save = useCallback(async () => {

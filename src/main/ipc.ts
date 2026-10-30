@@ -101,10 +101,9 @@ export function registerIpc(): void {
     try {
       await writeFile(path, content, 'utf8')
       const win = senderWindow(e)
-      if (win) {
-        setWindowPath(win, path)
-        setWindowDirty(win, false)
-      }
+      // El estado "sucio" lo decide el renderer: si el usuario escribió durante
+      // el guardado, sigue sucio y el aviso al cerrar debe seguir activo.
+      if (win) setWindowPath(win, path)
       return { ok: true, path }
     } catch (err) {
       return { ok: false, error: String(err) }
@@ -122,10 +121,7 @@ export function registerIpc(): void {
       if (result.canceled || !result.filePath) return { ok: false }
       try {
         await writeFile(result.filePath, content, 'utf8')
-        if (win) {
-          setWindowPath(win, result.filePath)
-          setWindowDirty(win, false)
-        }
+        if (win) setWindowPath(win, result.filePath)
         addRecent(result.filePath)
         rebuildMenu()
         return { ok: true, path: result.filePath }

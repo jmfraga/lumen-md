@@ -19,6 +19,24 @@
 - [x] Atajos con ⌘ en Mac y Ctrl en Windows/Linux en los tooltips
 - [x] README y plantillas de propuestas en inglés
 
+## v0.4.1 (2026-10-30) — solo arreglos
+
+Salió de una revisión externa con Codex y Antigravity contra las reglas ligero, rápido y útil.
+
+- [x] Imágenes locales en Windows (`C:\…` y carpetas de red) y nombres con espacios escritos como `%20`
+- [x] El aviso al cerrar ya no se pierde si escribes justo mientras se guarda
+- [x] Las imágenes pegadas se ven después de "Guardar como" sin reabrir
+- [x] PDF de documentos con muchas imágenes (archivo temporal en vez de URL) y sin JavaScript al imprimir
+- [x] `Ctrl+W` cierra la ventana en Windows y Linux
+
+## v0.5 (candidatos, medir antes y después)
+
+- Cargar Mermaid y la exportación solo cuando se usan
+- Colorear solo los ~10 lenguajes que usa la IA en la vista de código
+- Herramienta de capturas solo en desarrollo
+- Quitar `<script>` del HTML exportado
+- Pruebas de fidelidad más estrictas dentro de celdas y bloques de código
+
 ## Después
 
 En orden aproximado de interés:

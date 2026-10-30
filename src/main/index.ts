@@ -7,6 +7,7 @@ import { createWindow } from './windows'
 import { registerIpc, openPathInWindow } from './ipc'
 import { rebuildMenu } from './menu'
 import { initUpdater } from './updater'
+import { assetPathFromUrl } from '../shared/assets'
 
 /**
  * Arranque. Tres formas de recibir un archivo:
@@ -25,10 +26,8 @@ protocol.registerSchemesAsPrivileged([
 
 function registerAssetProtocol(): void {
   protocol.handle('lumen', (request) => {
-    const url = new URL(request.url)
-    if (url.host !== 'file') return new Response('not found', { status: 404 })
-    const path = decodeURIComponent(url.pathname)
-    if (!existsSync(path)) return new Response('not found', { status: 404 })
+    const path = assetPathFromUrl(request.url)
+    if (!path || !existsSync(path)) return new Response('not found', { status: 404 })
     return net.fetch(pathToFileURL(path).toString())
   })
 }
