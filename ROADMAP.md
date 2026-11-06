@@ -29,6 +29,10 @@ Salió de una revisión externa con Codex y Antigravity contra las reglas ligero
 - [x] PDF de documentos con muchas imágenes (archivo temporal en vez de URL) y sin JavaScript al imprimir
 - [x] `Ctrl+W` cierra la ventana en Windows y Linux
 
+## v0.4.2
+
+- [x] Buscar en el documento (`⌘F` / `Ctrl+F`), sin distinguir mayúsculas ni acentos, también en tablas y código; en la vista de fuente también reemplaza
+
 ## v0.5 (candidatos, medir antes y después)
 
 - Cargar Mermaid y la exportación solo cuando se usan

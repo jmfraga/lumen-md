@@ -5,6 +5,11 @@ import type { WysiwygHandle } from './editor/WysiwygEditor'
 import { insert, insertTable, insertCodeBlockWithContent } from './editor/insert'
 import type { InsertKind } from './editor/insert'
 import { SourceEditor } from './editor/SourceEditor'
+import type { SourceHandle } from './editor/SourceEditor'
+import { FindBar } from './ui/FindBar'
+import type { FindBarHandle } from './ui/FindBar'
+import { editorViewCtx } from '@milkdown/kit/core'
+import { TextSelection } from '@milkdown/kit/prose/state'
 import { buildExportHtml } from './export'
 import { TopBar } from './ui/TopBar'
 import { StatusBar } from './ui/StatusBar'
@@ -41,6 +46,7 @@ export default function App(): React.JSX.Element {
   const [epoch, setEpoch] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [wizard, setWizard] = useState(false)
+  const [finding, setFinding] = useState(false)
   const [update, setUpdate] = useState<UpdateState>({ status: 'idle' })
   const [lang, setLang] = useState<Lang>('es')
   const i18n = useMemo<I18n>(
@@ -50,12 +56,17 @@ export default function App(): React.JSX.Element {
   const untitled = i18n.t('app.untitled')
   const busy = useRef(false)
   const editorRef = useRef<WysiwygHandle>(null)
+  const sourceRef = useRef<SourceHandle>(null)
+  const findRef = useRef<FindBarHandle>(null)
+  const mainRef = useRef<HTMLElement>(null)
+  const getScroller = useCallback(() => mainRef.current, [])
 
   const loadPath = useCallback(
     async (path: string) => {
       const file = await window.lumen.readFile(path)
       store.load(file.path, file.content)
       window.lumen.setCurrentPath(file.path)
+      setFinding(false)
       setEpoch((e) => e + 1)
     },
     [store]
@@ -89,6 +100,7 @@ export default function App(): React.JSX.Element {
     () =>
       window.lumen.onLanguage((next) => {
         setLang(next)
+        setFinding(false)
         setEpoch((e) => e + 1)
       }),
     []
@@ -147,7 +159,45 @@ export default function App(): React.JSX.Element {
     [store, untitled, lang]
   )
 
+  const find = useCallback(() => {
+    if (store.get().mode === 'source') return sourceRef.current?.find()
+    if (finding) findRef.current?.focus()
+    else setFinding(true)
+  }, [store, finding])
+
+  const findStep = useCallback(
+    (dir: 1 | -1) => {
+      if (store.get().mode === 'source') return sourceRef.current?.step(dir)
+      if (finding) findRef.current?.step(dir)
+      else setFinding(true)
+    },
+    [store, finding]
+  )
+
+  // Al cerrar la búsqueda, el cursor queda sobre la coincidencia actual para seguir escribiendo.
+  const closeFind = useCallback((current: Range | null) => {
+    setFinding(false)
+    editorRef.current?.run((ctx) => {
+      const view = ctx.get(editorViewCtx)
+      try {
+        if (current) {
+          const from = view.posAtDOM(current.startContainer, current.startOffset)
+          const to = view.posAtDOM(current.endContainer, current.endOffset)
+          if (from < to) {
+            view.dispatch(
+              view.state.tr.setSelection(TextSelection.create(view.state.doc, from, to))
+            )
+          }
+        }
+      } catch {
+        /* coincidencia en un nodo especial (código, fórmula): solo regresamos el foco */
+      }
+      view.focus()
+    })
+  }, [])
+
   const toggleSource = useCallback(() => {
+    setFinding(false)
     store.setMode(store.get().mode === 'wysiwyg' ? 'source' : 'wysiwyg')
     setEpoch((e) => e + 1)
   }, [store])
@@ -179,9 +229,18 @@ export default function App(): React.JSX.Element {
         case 'toggle-autosave':
           void toggleAutosave()
           break
+        case 'find':
+          find()
+          break
+        case 'find-next':
+          findStep(1)
+          break
+        case 'find-prev':
+          findStep(-1)
+          break
       }
     })
-  }, [save, saveAs, exportAs, toggleSource, toggleAutosave])
+  }, [save, saveAs, exportAs, toggleSource, toggleAutosave, find, findStep])
 
   // Guardar al perder el foco de la ventana (autosave).
   useEffect(() => {
@@ -261,22 +320,33 @@ export default function App(): React.JSX.Element {
           onInsertTable={onInsertTable}
         />
         <UpdateBanner state={update} saveBeforeRestart={saveBeforeRestart} />
-        <main className="lumen-main">
-          {doc.mode === 'wysiwyg' ? (
-            <WysiwygEditor
-              ref={editorRef}
-              key={`w${epoch}`}
-              initialText={doc.text}
-              baseDir={dirOf(doc.path)}
-              docPath={doc.path}
-              onChange={onChange}
-              onStatus={onStatus}
-              lang={lang}
-            />
-          ) : (
-            <SourceEditor key={`s${epoch}`} initialText={doc.text} onChange={onChange} />
+        <div className="lumen-stage">
+          {finding && doc.mode === 'wysiwyg' && (
+            <FindBar ref={findRef} scroller={getScroller} onClose={closeFind} />
           )}
-        </main>
+          <main className="lumen-main" ref={mainRef}>
+            {doc.mode === 'wysiwyg' ? (
+              <WysiwygEditor
+                ref={editorRef}
+                key={`w${epoch}`}
+                initialText={doc.text}
+                baseDir={dirOf(doc.path)}
+                docPath={doc.path}
+                onChange={onChange}
+                onStatus={onStatus}
+                lang={lang}
+              />
+            ) : (
+              <SourceEditor
+                ref={sourceRef}
+                key={`s${epoch}`}
+                initialText={doc.text}
+                onChange={onChange}
+                lang={lang}
+              />
+            )}
+          </main>
+        </div>
         <StatusBar
           path={doc.path}
           autosave={doc.autosave}

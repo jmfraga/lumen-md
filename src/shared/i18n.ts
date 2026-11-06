@@ -224,7 +224,32 @@ const es = {
   'update.close': 'Cerrar',
   'update.errOffline': 'Sin conexión a internet. Se volverá a intentar más tarde.',
   'update.errApplications': 'Mueve Lumen a la carpeta Aplicaciones para poder actualizarla.',
-  'update.errGeneric': 'No se pudo revisar o descargar la actualización.'
+  'update.errGeneric': 'No se pudo revisar o descargar la actualización.',
+
+  'menu.find': 'Buscar…',
+  'menu.findNext': 'Buscar siguiente',
+  'menu.findPrev': 'Buscar anterior',
+  'find.placeholder': 'Buscar en el documento',
+  'find.count': '{i} de {n}',
+  'find.none': 'Sin resultados',
+  'find.prev': 'Anterior (⇧Enter)',
+  'find.next': 'Siguiente (Enter)',
+  'find.close': 'Cerrar (Esc)',
+  'cm.find': 'Buscar',
+  'cm.replace': 'Reemplazar',
+  'cm.next': 'siguiente',
+  'cm.previous': 'anterior',
+  'cm.all': 'todas',
+  'cm.matchCase': 'mayúsculas',
+  'cm.byWord': 'palabra completa',
+  'cm.regexp': 'expresión regular',
+  'cm.replaceOne': 'reemplazar',
+  'cm.replaceAll': 'reemplazar todas',
+  'cm.close': 'cerrar',
+  'cm.currentMatch': 'coincidencia actual',
+  'cm.onLine': 'en la línea',
+  'cm.replacedOnLine': 'Coincidencia reemplazada en la línea $',
+  'cm.replacedN': '$ coincidencias reemplazadas'
 } as const
 
 export type MessageKey = keyof typeof es
@@ -432,7 +457,32 @@ const en: Record<MessageKey, string> = {
   'update.close': 'Close',
   'update.errOffline': 'No internet connection. Lumen will try again later.',
   'update.errApplications': 'Move Lumen to the Applications folder so it can update.',
-  'update.errGeneric': "Couldn't check for or download the update."
+  'update.errGeneric': "Couldn't check for or download the update.",
+
+  'menu.find': 'Find…',
+  'menu.findNext': 'Find Next',
+  'menu.findPrev': 'Find Previous',
+  'find.placeholder': 'Find in document',
+  'find.count': '{i} of {n}',
+  'find.none': 'No results',
+  'find.prev': 'Previous (⇧Enter)',
+  'find.next': 'Next (Enter)',
+  'find.close': 'Close (Esc)',
+  'cm.find': 'Find',
+  'cm.replace': 'Replace',
+  'cm.next': 'next',
+  'cm.previous': 'previous',
+  'cm.all': 'all',
+  'cm.matchCase': 'match case',
+  'cm.byWord': 'by word',
+  'cm.regexp': 'regexp',
+  'cm.replaceOne': 'replace',
+  'cm.replaceAll': 'replace all',
+  'cm.close': 'close',
+  'cm.currentMatch': 'current match',
+  'cm.onLine': 'on line',
+  'cm.replacedOnLine': 'replaced match on line $',
+  'cm.replacedN': 'replaced $ matches'
 }
 
 export const DICTIONARIES: Record<Lang, Record<MessageKey, string>> = { es, en }

@@ -107,6 +107,7 @@ You need a free GitHub account. No programming required: describe it the way you
 - **Images** from the clipboard or from a file, copied to `assets/` next to the `.md`.
 - **Double-click** a `.md` to open it; one window per document; drag and drop; recent files menu.
 - **Autosave** (turn it off in the File menu). A warning on close if there are unsaved changes.
+- **Find in document** (`Cmd/Ctrl+F`): ignores case and accents, also inside tables and code. In the source view it can also replace.
 - **Export to self-contained HTML** and **to PDF** (`Cmd/Ctrl+P`).
 - **English and Spanish** interface, switchable at any time.
 - Light and dark theme following your system.
@@ -120,6 +121,7 @@ You need a free GitHub account. No programming required: describe it the way you
 | Save / Save As         | `⌘S` / `⇧⌘S`         | `Ctrl+S` / `Ctrl+Shift+S` |
 | Toggle Markdown source | `⌘/`                 | `Ctrl+/`                  |
 | Export to PDF          | `⌘P`                 | `Ctrl+P`                  |
+| Find in document       | `⌘F`, then `⌘G`      | `Ctrl+F`, then `Ctrl+G`   |
 | Block menu             | `/` on an empty line | `/` on an empty line      |
 
 ## FAQ

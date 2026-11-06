@@ -90,6 +90,9 @@ export type MenuCommand =
   | 'toggle-source'
   | 'toggle-autosave'
   | 'request-close'
+  | 'find'
+  | 'find-next'
+  | 'find-prev'
 
 export const IPC = {
   getInitialFile: 'lumen:get-initial-file',

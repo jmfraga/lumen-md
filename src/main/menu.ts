@@ -123,7 +123,15 @@ export function buildMenu(): Menu {
         { role: 'copy', label: t('menu.copy') },
         { role: 'paste', label: t('menu.paste') },
         { role: 'pasteAndMatchStyle', label: t('menu.pasteAndMatchStyle') },
-        { role: 'selectAll', label: t('menu.selectAll') }
+        { role: 'selectAll', label: t('menu.selectAll') },
+        { type: 'separator' },
+        { label: t('menu.find'), accelerator: 'CmdOrCtrl+F', click: () => send('find') },
+        { label: t('menu.findNext'), accelerator: 'CmdOrCtrl+G', click: () => send('find-next') },
+        {
+          label: t('menu.findPrev'),
+          accelerator: 'Shift+CmdOrCtrl+G',
+          click: () => send('find-prev')
+        }
       ]
     },
     {

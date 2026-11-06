@@ -107,6 +107,7 @@ Necesitas una cuenta gratuita de GitHub. No hace falta saber programar: cuéntal
 - **Imágenes** desde el portapapeles o desde archivo, copiadas a `assets/` junto al `.md`.
 - **Doble clic** sobre un `.md` lo abre; una ventana por documento; arrastrar y soltar; menú de recientes.
 - **Autoguardado** (se apaga en el menú Archivo). Aviso al cerrar si hay cambios sin guardar.
+- **Buscar en el documento** (`Cmd/Ctrl+F`): sin distinguir mayúsculas ni acentos, también en tablas y código. En la vista de fuente también reemplaza.
 - **Exportar a HTML** autocontenido y **a PDF** (`Cmd/Ctrl+P`).
 - Interfaz en **español e inglés**, intercambiable en cualquier momento.
 - Tema claro y oscuro siguiendo el sistema.
@@ -122,6 +123,7 @@ Necesitas una cuenta gratuita de GitHub. No hace falta saber programar: cuéntal
 | Guardar / Guardar como   | `⌘S` / `⇧⌘S`       | `Ctrl+S` / `Ctrl+Shift+S` |
 | Alternar fuente Markdown | `⌘/`               | `Ctrl+/`                  |
 | Exportar a PDF           | `⌘P`               | `Ctrl+P`                  |
+| Buscar en el documento   | `⌘F`, luego `⌘G`   | `Ctrl+F`, luego `Ctrl+G`  |
 | Menú de bloques          | `/` en línea vacía | `/` en línea vacía        |
 
 ## Preguntas frecuentes

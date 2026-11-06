@@ -181,6 +181,75 @@ body {
   margin: 0 4px;
 }
 
+/* Contenedor del editor: da posición a la barra de búsqueda flotante. */
+.lumen-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Buscar en el documento */
+.lumen-find {
+  position: absolute;
+  top: 10px;
+  right: 22px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 32px);
+  padding: 5px 6px 5px 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-chrome);
+  color: var(--ui-fg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-size: 13px;
+}
+.lumen-find input {
+  font: inherit;
+  width: 220px;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 5px;
+  background: var(--ui-bg);
+  color: var(--ui-fg);
+  outline: none;
+}
+.lumen-find input:focus {
+  border-color: var(--ui-accent);
+}
+.lumen-find-count {
+  min-width: 6.5em;
+  text-align: center;
+  color: var(--ui-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lumen-find button {
+  font: inherit;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ui-fg);
+  cursor: pointer;
+}
+.lumen-find button:hover {
+  background: var(--ui-accent-soft);
+}
+::highlight(lumen-find) {
+  background-color: rgba(255, 200, 0, 0.35);
+}
+::highlight(lumen-find-current) {
+  background-color: rgba(255, 140, 0, 0.75);
+  color: #000;
+}
+
 .lumen-main {
   flex: 1;
   min-height: 0;
