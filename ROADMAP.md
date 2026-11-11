@@ -33,6 +33,11 @@ Salió de una revisión externa con Codex y Antigravity contra las reglas ligero
 
 - [x] Buscar en el documento (`⌘F` / `Ctrl+F`), sin distinguir mayúsculas ni acentos, también en tablas y código; en la vista de fuente también reemplaza
 
+## v0.4.3 (2026-11-11) — arreglos
+
+- [x] Cantidades con `$` (`MX$2,025 … MX$17,900`) ya no se muestran como fórmula; regla de Pandoc para `$…$`
+- [x] `[nota]` sin enlace se guarda sin `\[`
+
 ## v0.5 (candidatos, medir antes y después)
 
 - Cargar Mermaid y la exportación solo cuando se usan
@@ -40,6 +45,7 @@ Salió de una revisión externa con Codex y Antigravity contra las reglas ligero
 - Herramienta de capturas solo en desarrollo
 - Quitar `<script>` del HTML exportado
 - Pruebas de fidelidad más estrictas dentro de celdas y bloques de código
+- Avisar si el archivo cambió en disco mientras estaba abierto, antes de guardar encima (caso real 11-nov: otra herramienta lo reescribió y Lumen guardó su versión vieja)
 
 ## Después
 
